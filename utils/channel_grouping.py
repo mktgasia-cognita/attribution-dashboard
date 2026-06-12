@@ -54,8 +54,8 @@ CHANNEL_COLORS = {
     "Social": "#34495e",
     "Display": "#f39c12",
     "PaidVideo": "#d35400",
-    "CompetitorPaidSearch": "#c0392b",
-    "PMaxPaidSearch": "#e74c3c",
+    "CompetitorPaidSearch": "#8e44ad",
+    "PMaxPaidSearch": "#2980b9",
     "Offline": "#7f8c8d",
     "Other": "#bdc3c7",
 }
