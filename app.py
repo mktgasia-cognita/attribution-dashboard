@@ -4,7 +4,7 @@ st.set_page_config(
     page_title="Cognita Attribution Dashboard",
     page_icon="C",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 
@@ -13,12 +13,25 @@ def _check_password():
         return True
     if st.session_state.get("authenticated"):
         return True
-    pwd = st.text_input("Password", type="password", key="pwd_input")
-    if pwd == st.secrets["password"]:
-        st.session_state["authenticated"] = True
-        st.rerun()
-    elif pwd:
-        st.error("Incorrect password")
+
+    st.markdown("""
+    <style>
+        .stApp {background-color: #fafbfc;}
+        section[data-testid="stSidebar"] {display: none;}
+        header[data-testid="stHeader"] {display: none;}
+    </style>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        st.markdown("<div style='padding-top: 20vh;'></div>", unsafe_allow_html=True)
+        st.markdown("#### Cognita Attribution Dashboard")
+        pwd = st.text_input("Password", type="password", key="pwd_input")
+        if pwd == st.secrets["password"]:
+            st.session_state["authenticated"] = True
+            st.rerun()
+        elif pwd:
+            st.error("Incorrect password")
     return False
 
 
