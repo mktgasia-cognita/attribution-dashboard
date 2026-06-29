@@ -13,6 +13,7 @@ def render(data, filters):
         st.warning("No data for selected filters.")
         return
 
+    journeys = journeys[~journeys["channel_grouping"].isin(["Offline", "(Other)"])]
     journeys = _add_position_bucket(journeys)
 
     _render_ai_referral_callout(journeys)
@@ -102,7 +103,8 @@ def _render_sankey(journeys, dimension, color_map, threshold_pct=0.01):
 
     link_df = pd.DataFrame(links)
     link_agg = link_df.groupby(["source", "target"])["value"].sum().reset_index()
-    min_threshold = max(5, link_agg["value"].quantile(0.10))
+    n_journeys = len(set(s.split("|")[0] for s in link_df["source"]))
+    min_threshold = max(1, min(3, link_agg["value"].quantile(0.15)))
     link_agg = link_agg[link_agg["value"] >= min_threshold]
 
     if link_agg.empty:
@@ -122,7 +124,7 @@ def _render_sankey(journeys, dimension, color_map, threshold_pct=0.01):
         source_label = row["source"].split("|", 1)[1]
         base = color_map.get(source_label, "#bdc3c7")
         r, g, b = int(base[1:3], 16), int(base[3:5], 16), int(base[5:7], 16)
-        link_colors.append(f"rgba({r},{g},{b},0.25)")
+        link_colors.append(f"rgba({r},{g},{b},0.45)")
 
     pos_labels = {1: "First Touch", 2: "Second Touch", 3: "Middle Touches", 4: "Last Touch"}
     annotations = []

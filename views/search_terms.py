@@ -17,8 +17,8 @@ def render(data, filters):
         impressions=("impressions", "sum"),
     ).reset_index()
     match_agg["cpc"] = (match_agg["cost"] / match_agg["clicks"].replace(0, 1)).round(2)
-    match_agg["cost"] = match_agg["cost"].apply(lambda x: f"${x:,.0f}")
-    match_agg["cpc"] = match_agg["cpc"].apply(lambda x: f"${x:.2f}")
+    match_agg["cost"] = match_agg["cost"].apply(lambda x: f"SGD {x:,.0f}")
+    match_agg["cpc"] = match_agg["cpc"].apply(lambda x: f"SGD {x:.2f}")
     match_agg.columns = ["Match Type", "Cost", "Clicks", "Impressions", "CPC"]
     st.dataframe(match_agg, use_container_width=True, hide_index=True)
 
@@ -32,6 +32,6 @@ def render(data, filters):
         clicks=("clicks", "sum"),
     ).reset_index()
     campaign_match = campaign_match.sort_values("cost", ascending=False).head(30)
-    campaign_match["cost"] = campaign_match["cost"].apply(lambda x: f"${x:,.0f}")
+    campaign_match["cost"] = campaign_match["cost"].apply(lambda x: f"SGD {x:,.0f}")
     campaign_match.columns = ["Match Type", "Campaign", "Search Terms", "Keyword", "Cost", "Clicks"]
     st.dataframe(campaign_match, use_container_width=True, hide_index=True)

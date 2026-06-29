@@ -1,0 +1,18 @@
+school,campaign,spend,impressions,clicks,conversions,conversions_value,date,channel_grouping,source,medium,cpc
+BCS,FPD_HK_PMax_AO-2024,177.28,8810,79,1.66,33.11,2026-06-12,PMax,google,cpc,2.24
+BCS,FPD_JP_PMax_AO-2024,187.13,33919,214,0.0,0.0,2026-06-12,PMax,google,cpc,0.87
+BCS,FPD_SG_DG_AO-DailyBudget,568.94,81928,417,0.0,0.0,2026-06-12,DemandGen,google,cpc,1.36
+BCS,FPD_SG_Display_Book A Tour,420.17,801045,6125,0.0,0.0,2026-06-12,Display,google,cpc,0.07
+BCS,FPD_SG_PMax_AO,2174.03,78100,643,1.0,20.0,2026-06-12,PMax,google,cpc,3.38
+BCS,FPD_SG_PMax_AO_Pre&PrePrep 2025,1101.64,49184,427,0.0,0.0,2026-06-12,PMax,google,cpc,2.58
+BCS,FPD_SG_Search_ALevel,1016.11,1595,36,0.0,0.0,2026-06-12,PaidSearch,google,cpc,28.23
+BCS,FPD_SG_Search_Brand,1080.7,856,132,1.0,20.0,2026-06-12,PaidSearch,google,cpc,8.19
+BCS,FPD_SG_Search_IGCSE School,826.04,3114,44,0.0,0.0,2026-06-12,PaidSearch,google,cpc,18.77
+BCS,FPD_UK_PMax_AO-2024,672.65,32032,273,3.0,60.0,2026-06-12,PMax,google,cpc,2.46
+BCS,FPD-SG-LeadGen-WebConv-AO-BookATour-2025,1289.52,112208,875,15.0,0.0,2026-06-12,PaidSocial,facebook,paid,1.47
+BCS,FPD-JP-Lead-Web-VOH-Dec25,389.11,42875,493,1.0,0.0,2026-06-12,PaidSocial,facebook,paid,0.79
+BCS,FPD-HK-Lead-Web-VOH-Dec25,377.35,32306,740,13.0,0.0,2026-06-12,PaidSocial,facebook,paid,0.51
+BCS,FPD-UK-Lead-Web-VOH-Dec25,863.93,54118,1613,3.0,0.0,2026-06-12,PaidSocial,facebook,paid,0.54
+BCS,FPD-SG-LeadGen-Web-AO-SixthFormLaunch-DecJan2025,1145.29,56342,920,14.0,0.0,2026-06-12,PaidSocial,facebook,paid,1.24
+BCS,FPD-SG-LeadGen-Web-AO-OpenMorning Dec2025,1912.09,374639,4039,3.0,0.0,2026-06-12,PaidSocial,facebook,paid,0.47
+BCS,FPD-SG-LeadGen-Web-AO-Pre-Prep Early Years-2026Feb,998.0,11135,547,3.0,0.0,2026-06-12,PaidSocial,facebook,paid,1.82

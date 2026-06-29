@@ -45,8 +45,10 @@ def classify_channel(source, medium, campaign):
 
 CHANNEL_COLORS = {
     "Organic Search": "#2ecc71",
+    "OrganicSearch": "#2ecc71",
     "Direct": "#95a5a6",
     "Paid Social": "#3498db",
+    "PaidSocial": "#3498db",
     "GenericPaidSearch": "#e74c3c",
     "BrandedPaidSearch": "#e67e22",
     "Referral": "#9b59b6",
@@ -57,5 +59,7 @@ CHANNEL_COLORS = {
     "CompetitorPaidSearch": "#8e44ad",
     "PMaxPaidSearch": "#2980b9",
     "Offline": "#7f8c8d",
+    "Local": "#27ae60",
     "Other": "#bdc3c7",
+    "(Other)": "#bdc3c7",
 }

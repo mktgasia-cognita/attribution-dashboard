@@ -4,7 +4,7 @@ st.set_page_config(
     page_title="Cognita Attribution Dashboard",
     page_icon="C",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 
@@ -69,49 +69,39 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-from data.synthetic import load_all_data
+from data.real_data import load_bcs_data
 from utils.filters import render_sidebar
-from pages import overview, conversion_matrix, opportunities, journeys, crm_journeys, search_terms, weekly_goals
+from views import overview, conversion_matrix, opportunities, journeys, crm_journeys, search_terms, weekly_goals
 
 
 @st.cache_data
 def get_data():
-    return load_all_data()
+    return load_bcs_data()
 
+
+PAGES = {
+    "Overview": overview,
+    "Conversion Matrix": conversion_matrix,
+    "Opportunities": opportunities,
+    "Journeys": journeys,
+    "CRM Journeys": crm_journeys,
+    "Search Terms": search_terms,
+    "Weekly Goals": weekly_goals,
+}
+
+page = st.sidebar.radio("", list(PAGES.keys()), label_visibility="collapsed")
+st.sidebar.divider()
 
 data = get_data()
 filters = render_sidebar(data)
 
-st.title("Cognita Attribution Dashboard")
-st.caption("Position-based attribution (40/20/40) across GA4, Google Ads, Meta Ads, and Dynamics 365")
+st.title("BCS Attribution Dashboard")
+dates = data["attributed"]["date"].dropna()
+if len(dates):
+    date_min = dates.min().strftime("%b %-d")
+    date_max = dates.max().strftime("%b %-d")
+    st.caption(f"Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4 | {date_min}–{date_max}")
+else:
+    st.caption("Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4")
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-    "Overview",
-    "Conversion Matrix",
-    "Opportunities",
-    "Journeys",
-    "CRM Journeys",
-    "Search Terms",
-    "Weekly Goals",
-])
-
-with tab1:
-    overview.render(data, filters)
-
-with tab2:
-    conversion_matrix.render(data, filters)
-
-with tab3:
-    opportunities.render(data, filters)
-
-with tab4:
-    journeys.render(data, filters)
-
-with tab5:
-    crm_journeys.render(data, filters)
-
-with tab6:
-    search_terms.render(data, filters)
-
-with tab7:
-    weekly_goals.render(data, filters)
+PAGES[page].render(data, filters)

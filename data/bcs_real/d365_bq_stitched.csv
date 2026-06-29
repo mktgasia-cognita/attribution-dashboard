@@ -1,0 +1,75 @@
+d365_id,journey_id,cid,user_pseudo_id,stage,admission_status,created_on,bq_sessions_found,first_touch_source,first_touch_medium,first_touch_campaign,first_touch_date
+cf6118e2-9078-43d0-9fd4-5c368968bf41,BCS-0001,,,D1 Lead,01 New,14/6/26 6:16,0,facebook,cpc,FPD-SG-LeadGen-Web-AO-Pre-Prep Early Years-2026Feb_AllAges,2026-06-14
+ae3eb1e2-0026-4c2e-8c52-6ccf9c007fc9,BCS-0002,746442318.1782552704,9PzOm83VwqS6ARZE7YCDeF1cnwHCN2nlychKqFOb+Co=.1782552704,D1 Lead,01 New,27/6/26 17:46,1,google,cpc,FPD_PM_Local_SEM_SG_GSEM_EN_BRAND_Brand,2026-06-27
+9072b276-5e44-4092-a5f8-cd4430e90e6d,BCS-0003,1764069962.1779796388,4oxa/aGrlXwLabbM23wIOSfz96BenYa4bc5GwnJ3kqg=.1779796388,D1 Lead,01 New,12/6/26 12:21,3,google,organic,(organic),2026-06-11
+9284fd71-02f2-4b05-9d7f-ddcdfc586ae9,BCS-0004,1764069962.1779796388,4oxa/aGrlXwLabbM23wIOSfz96BenYa4bc5GwnJ3kqg=.1779796388,D1 Lead,01 New,12/6/26 12:16,3,google,organic,(organic),2026-06-11
+f75700c2-f8eb-4451-b1c6-f56d348a6d50,BCS-0005,,,D1 Lead,01 New,16/6/26 20:41,0,facebook,cpc,FPD-SG-LeadGen-Web-AO-Pre-Prep Early Years-2026Feb_AllAges,2026-06-16
+87745c8e-b9bf-434b-b6dd-032160cbe01f,BCS-0006,1129838121.1782639564,BS/17NkCcuYceGPFeyPJoumolSgfygu9j6DojI9WrA0=.1778980702,D1 Lead,02 Nurturing,28/6/26 18:21,6,(direct),(none),(direct),2026-06-08
+17c5a634-d71c-4c5d-9aa4-0767faa8f31c,BCS-0007,1055705506.1782379042,6sLeqpnTXiFUGpgpyzyPnMb7isIz6H6d0VGk9FeZWU4=.1782379042,D1 Lead,02 Nurturing,25/6/26 17:27,3,google,cpc,FPD_PM_Regional_PMAX_UK_PMAX_EN_GENERIC_Generic,2026-06-25
+8aee02ed-17fa-48f9-a751-2d92ebcbf2aa,BCS-0008,1369156845.1781694932,D/zW+abLkV0GfTxVvxhnrwpHiqLHGcP9J0Tg6ehqiHA=.1781694932,D1 Lead,02 Nurturing,17/6/26 20:02,15,google,organic,(organic),2026-06-17
+aa52353d-722d-43e1-a95d-3ead9eb1669b,BCS-0009,,,D1 Lead,02 Nurturing,26/6/26 17:56,0,(direct),(none),(not set),2026-06-26
+1d8ec3a6-e98d-4cdf-b893-49b27ab8a7da,BCS-0010,547464265.1782691389,,D1 Lead,02 Nurturing,29/6/26 8:11,0,(direct),(none),(not set),2026-06-29
+00158f24-1952-4f26-9a06-5cf1369f87b1,BCS-0011,794677415.1781436849,eX9BQi2N3qmOOuD9bPKEYFxptTe2hTAHR8Eep5S9kK4=.1781436849,D1 Lead,02 Nurturing,14/6/26 19:46,1,google,organic,(organic),2026-06-14
+9c9c6123-d94c-4fae-84f4-6b23b70cbbb2,BCS-0012,1950632970.1782058244,uR24QtULh65K1fOoJmdoU8BI26+5L4eMU3/L+68UgSE=.1782058244,D1 Lead,02 Nurturing,22/6/26 0:21,1,google,cpc,FPD_PM_Regional_PMAX_UK_PMAX_EN_GENERIC_Generic,2026-06-22
+6736d1fd-8f95-47d9-8427-7ae53990f34e,BCS-0013,,,D1 Lead,02 Nurturing,26/6/26 17:56,0,(direct),(none),(not set),2026-06-26
+73e66a7b-d41e-41c1-a6b7-80ff5f700855,BCS-0014,1489978426.1781260479,6PxkkkLgUeNJbDmmdb4S5UIERS5LXLjJstrfQ250cCo=.1781260479,D1 Lead,02 Nurturing,15/6/26 12:56,7,google,gmb,google_my_business,2026-06-12
+776b335c-139e-4cfe-85f0-856969917fd7,BCS-0015,1369156845.1781694932,D/zW+abLkV0GfTxVvxhnrwpHiqLHGcP9J0Tg6ehqiHA=.1781694932,D1 Lead,02 Nurturing,17/6/26 20:02,15,google,organic,(organic),2026-06-17
+dba6da10-6436-4871-8f2c-a0450d57412c,BCS-0016,794677415.1781436849,eX9BQi2N3qmOOuD9bPKEYFxptTe2hTAHR8Eep5S9kK4=.1781436849,D1 Lead,02 Nurturing,14/6/26 19:46,1,google,organic,(organic),2026-06-14
+8f89eefb-c181-4539-990b-a11777aa3d56,BCS-0017,935616837.1781777435,dbALt3cGG/2aX5y7Scn5QDg0VTr1N0VlecqNLQTdH0M=.1781777435,D1 Lead,02 Nurturing,18/6/26 18:21,2,bing,organic,(organic),2026-06-18
+9577d229-fb90-43b1-9ce2-a9f7e33abf9f,BCS-0018,1289558045.1782380646,w6DignxssOEOkiEuaBO3rhfQ+U1HCmKPGnvSLx4Xijc=.1782380646,D1 Lead,02 Nurturing,25/6/26 17:51,2,google,organic,(organic),2026-06-25
+2d38f38c-44de-419b-95eb-c8175a4603bd,BCS-0019,1369156845.1781694932,D/zW+abLkV0GfTxVvxhnrwpHiqLHGcP9J0Tg6ehqiHA=.1781694932,D1 Lead,02 Nurturing,17/6/26 20:02,15,google,organic,(organic),2026-06-17
+54c7ee4b-205f-4992-b596-cf7f0233209b,BCS-0020,1406455176.1781933867,WijsFtfkhCKcBoDMFCR5QL501l8uEX9JA6fS3Abz9XU=.1781933867,D1 Lead,02 Nurturing,21/6/26 13:36,3,facebook,cpc,FPD-SG-LeadGen-Web-AO-Pre-Prep Early Years-2026Feb_AllAges,2026-06-20
+ae2b885d-3836-4d29-b774-d08d9d282538,BCS-0021,1055705506.1782379042,6sLeqpnTXiFUGpgpyzyPnMb7isIz6H6d0VGk9FeZWU4=.1782379042,D1 Lead,02 Nurturing,25/6/26 17:27,3,google,cpc,FPD_PM_Regional_PMAX_UK_PMAX_EN_GENERIC_Generic,2026-06-25
+1fbeb719-69b3-4162-9d0b-dcd14169ee10,BCS-0022,1641947080.1782659539,9aIMorD7ETJxMo92u5s5fuY/E+M8+0KPr+CR4lvrM90=.1782659539,D1 Lead,02 Nurturing,28/6/26 23:32,1,google,cpc,FPD_PM_Regional_PMAX_HK_PMAX_EN_GENERIC_Generic,2026-06-28
+228a2978-7488-4732-b1a1-deff6d789b79,BCS-0023,1573621795.1781494869,R/6l0jLfr6YxXt373tUjQ60LsYaW/mVCa5OI1YAOHHU=.1781494869,D1 Lead,02 Nurturing,15/6/26 11:46,1,google,cpc,FPD_PM_Local_PMAX_SG_PMAX_EN_GENERIC_Generic,2026-06-15
+c9843d47-d86c-46ec-90b0-e6f7b5da9882,BCS-0024,1702650168.1782364495,3OJ7xCyH7QWabUb4LDJ78LUE/3Z8EyFlNeebSBJ47KE=.1782364495,D1 Lead,02 Nurturing,25/6/26 13:21,5,(direct),(none),(direct),2026-06-25
+867e5117-4dd3-406b-a1ca-00adc2518aeb,BCS-0025,791340163.1780363043,7ptJLUBRKwQ7tCx9rtEB/ERDmi1EEbMkBC3hTLNiXQM=.1780363043,D2 Enquiry,03 Qualified,22/6/26 13:57,3,google,cpc,FPD_PM_Local_PMAX_SG_PMAX_EN_GENERIC_Generic,2026-06-15
+00902525-f488-4c59-95ba-185518c808cd,BCS-0026,5932740.1781800802,O+O6+msuPNaEHAuwP7J5vt+LwqmdK865gr/heCLxQYw=.1781800802,D2 Enquiry,03 Qualified,19/6/26 13:02,3,facebook,cpc,FPD-SG-LeadGen-Web-AO-SixthFormLaunch-DecJan2025,2026-06-19
+82c1019e-110b-4835-a8ea-1ea18c3d86bf,BCS-0027,1888997948.1780233931,OtHRkDA33insJIqzVFFpY6EH5WL4HrjwtAPQ/MLF3Mc=.1780233931,D2 Enquiry,03 Qualified,24/6/26 18:12,2,google,organic,(organic),2026-06-24
+4aeb8f17-48c9-4178-a972-215b23dca380,BCS-0028,1244191438.1781685077,/eAfoizihTiEIuXF6xveZXo73fpDja2sUgJIuTSG2sw=.1781685077,D2 Enquiry,03 Qualified,19/6/26 12:11,3,google,gmb,google_my_business,2026-06-17
+68718f60-ef15-48ca-a6f6-27ec2ce633ec,BCS-0029,972637400.1782565410,yJQfGSAfq2v9Zyk8ayEbH8blVdq08YCh69CAlaLyJfw=.1782565410,D2 Enquiry,03 Qualified,27/6/26 21:11,2,google,organic,(organic),2026-06-27
+aa909b11-2108-4f66-a05d-7cb6300a2b62,BCS-0030,492161468.1782094106,8sl+WSMmsT7a8JaF+zL7nPA16zA27Oq6CQpQEGm4RRs=.1782094106,D2 Enquiry,03 Qualified,22/6/26 10:11,5,google,organic,(organic),2026-06-22
+cc840ffa-dfb3-458a-9f87-be0bceee6964,BCS-0031,1997157060.1780748121,h2wmvzT9HR4lAzR90w3tyDhPXETeEiDy3oiwpIEnlu0=.1780748121,D2 Enquiry,03 Qualified,15/6/26 10:21,3,chatgpt.com,referral,(referral),2026-06-06
+c1861f2b-6132-41ee-8699-c798d147ad45,BCS-0032,1045373774.1782107313,9O4k+6z7hQuoKzUYaqHW21y7sYl/Od4CHfvSQ5ZN8I8=.1782107313,D2 Enquiry,03 Qualified,22/6/26 13:56,1,(direct),(none),(direct),2026-06-22
+c7594549-2dfe-4659-a04c-f8e7831fb2b6,BCS-0033,1888997948.1780233931,OtHRkDA33insJIqzVFFpY6EH5WL4HrjwtAPQ/MLF3Mc=.1780233931,D2 Enquiry,03 Qualified,24/6/26 18:11,2,google,organic,(organic),2026-06-24
+b416031b-8570-488d-a35c-01068d43afb6,BCS-0034,316065320.1781683602,GaVRJ6UJRbqrDzstP/pbSuzHoRLMAC4Df2Gjm66OoRk=.1781683602,D2 Enquiry,04 Visited,17/6/26 16:21,6,google,gmb,google_my_business,2026-06-17
+7df63018-2a69-4231-937e-063ca0aa4bd2,BCS-0035,10819262.1781881415,F4ZYcrmbRaxC2PNjien6zitoF8HAcKcSy3zP6Nw5Mzg=.1781881415,D2 Enquiry,04 Visited,22/6/26 21:36,2,(direct),(none),(direct),2026-06-19
+bf32a96a-3ec9-47a6-994b-11b4c60f2a6e,BCS-0036,1941531517.1764752889,LHne94bNP6FcxHkUE06KcRpo56Et7dH0z1U18blxlX8=.1764752889,D2 Enquiry,04 Visited,16/6/26 15:56,7,bing,organic,(organic),2026-06-15
+331b2b88-2cfb-425c-a0c2-228df5142d53,BCS-0037,316065320.1781683602,GaVRJ6UJRbqrDzstP/pbSuzHoRLMAC4Df2Gjm66OoRk=.1781683602,D2 Enquiry,04 Visited,17/6/26 16:22,6,google,gmb,google_my_business,2026-06-17
+cfeb6985-0985-4b32-8857-320be9216071,BCS-0038,226887590.1781592293,U9sHCicDSs1N1Qmfp3A6MwqVkjpcVAdEZI9YZtJvrKo=.1781592293,D2 Enquiry,04 Visited,18/6/26 22:11,5,google,organic,(organic),2026-06-16
+fe38411a-16e9-4e73-905f-35ae7fd3f0bd,BCS-0039,,,D2 Enquiry,04 Visited,13/6/26 6:52,0,(direct),(none),(not set),2026-06-13
+b5994e57-4c06-4281-8918-3bba244e1087,BCS-0040,1927487583.1781911860,yss5Mw1pHpApqEvQl/4Y68hkqv3/PXsrH6tXwCVbn5c=.1781911860,D2 Enquiry,04 Visited,20/6/26 7:41,2,google,organic,(organic),2026-06-20
+0710df9c-25e1-42be-8737-3bd23122d268,BCS-0041,,,D2 Enquiry,04 Visited,15/6/26 13:45,0,offline,offline,phone-enquiry,2026-06-15
+98808874-6e01-4c41-ac72-44db1908e36e,BCS-0042,333291339.1782298243,hdTdb2np42M2ZyFCGhRQ+WLMD9DK+kOZqQUViLfVr1I=.1782298243,D2 Enquiry,04 Visited,24/6/26 19:02,6,sg.search.yahoo.com,referral,(referral),2026-06-24
+d5c5a203-e518-48e3-bb18-70a7eabbd3fc,BCS-0043,,,D2 Enquiry,04 Visited,12/6/26 9:21,0,(direct),(none),(not set),2026-06-12
+66b2f6cb-0d9a-41ac-968d-76618cb3e178,BCS-0044,407798391.1781748077,LuEMx9zAWmo+IhG4O80tet2808qXxX1mOGTqnVAVEzs=.1781748077,D2 Enquiry,04 Visited,18/6/26 10:11,1,google,organic,(organic),2026-06-18
+baf328ae-522b-46ff-8932-8e96977c6e15,BCS-0045,,,D2 Enquiry,04 Visited,16/6/26 13:31,0,(direct),(none),(not set),2026-06-16
+f19a87fa-1240-428b-b45b-a3f8667d1013,BCS-0046,,,D2 Enquiry,04 Visited,13/6/26 6:51,0,(direct),(none),(not set),2026-06-13
+7b7e517b-51a9-4215-9169-d18cb3058651,BCS-0047,,,D3 Application,05 In Progress,19/6/26 14:38,0,offline,offline,direct-application,2026-06-19
+1fe45606-e9a7-4094-b43a-06b2b76936f4,BCS-0048,,,D3 Application,06 Submitted,12/6/26 13:50,0,offline,offline,direct-application,2026-06-12
+2e13a8c2-8f5b-4308-824b-137b1954c242,BCS-0049,,,D3 Application,06 Submitted,12/6/26 13:51,0,offline,offline,direct-application,2026-06-12
+90ed9e62-5113-4ec8-9c61-21039edbc3c8,BCS-0050,,,D3 Application,06 Submitted,18/6/26 2:00,0,offline,offline,direct-application,2026-06-18
+2ecec499-8df8-481a-97a7-4552a1041aa8,BCS-0051,,,D3 Application,06 Submitted,12/6/26 2:39,0,offline,offline,direct-application,2026-06-12
+df647d61-843a-45a9-94df-49f262d69192,BCS-0052,,,D3 Application,06 Submitted,12/6/26 13:50,0,offline,offline,direct-application,2026-06-12
+ba72b6f6-3bfe-4ad7-a3ed-5151781a984e,BCS-0053,,,D3 Application,06 Submitted,12/6/26 17:02,0,offline,offline,direct-application,2026-06-12
+cc56b8e7-b3e1-4093-bfca-624ef6d3794e,BCS-0054,,,D3 Application,06 Submitted,12/6/26 2:38,0,offline,offline,direct-application,2026-06-12
+7241f114-2261-4c9e-8b52-8368adcc4f79,BCS-0055,,,D3 Application,06 Submitted,15/6/26 23:15,0,offline,offline,direct-application,2026-06-15
+b239c76b-25fa-46d6-979c-96acafae0ec2,BCS-0056,,,D3 Application,06 Submitted,15/6/26 10:30,0,offline,offline,direct-application,2026-06-15
+89d65308-e5c9-4f21-99bc-9b003534e6c7,BCS-0057,,,D3 Application,06 Submitted,12/6/26 17:01,0,offline,offline,direct-application,2026-06-12
+4ca3a32e-d652-48ed-b916-9b8628cc284e,BCS-0058,,,D3 Application,06 Submitted,12/6/26 20:38,0,offline,offline,direct-application,2026-06-12
+668abf55-9f1b-48f2-821b-af35bef33314,BCS-0059,,,D3 Application,06 Submitted,27/6/26 17:58,0,offline,offline,direct-application,2026-06-27
+5c48ab95-0e41-434d-938c-b3fc889722df,BCS-0060,,,D3 Application,06 Submitted,16/6/26 2:39,0,offline,offline,direct-application,2026-06-16
+136315d3-527a-44fe-b8d0-c5344f1ab2e7,BCS-0061,,,D3 Application,06 Submitted,12/6/26 17:05,0,offline,offline,direct-application,2026-06-12
+b64af2e7-123a-4cc9-90e5-c7d55c8f4241,BCS-0062,,,D3 Application,06 Submitted,12/6/26 17:00,0,offline,offline,direct-application,2026-06-12
+53ec01b8-e5d2-4941-b2c1-e2c513ab6bd8,BCS-0063,,,D3 Application,06 Submitted,12/6/26 17:01,0,offline,offline,direct-application,2026-06-12
+93f6ff36-8ef9-49a4-b4f7-e3bc55cd081c,BCS-0064,1766672928.1774510119,,D3 Application,06 Submitted,28/6/26 21:35,0,(direct),(none),(not set),2026-06-28
+cc61cbdb-0138-44c4-bed0-e9204f0cf709,BCS-0065,,,D3 Application,06 Submitted,16/6/26 2:38,0,offline,offline,direct-application,2026-06-16
+46a44eb0-0b96-4145-bf77-eced36e2dacd,BCS-0066,935616837.1781777435,dbALt3cGG/2aX5y7Scn5QDg0VTr1N0VlecqNLQTdH0M=.1781777435,D3 Application,06 Submitted,19/6/26 16:16,2,bing,organic,(organic),2026-06-18
+7fac05f5-50bb-4223-b4f8-f4bb55dda24e,BCS-0067,,,D3 Application,06 Submitted,18/6/26 2:00,0,offline,offline,direct-application,2026-06-18
+7cf5f04b-0649-47c2-a0d1-fe456874a0fa,BCS-0068,,,D3 Application,06 Submitted,24/6/26 15:21,0,offline,offline,direct-application,2026-06-24
+606fc193-2d20-451f-b30f-2abf4bded87e,BCS-0069,316065320.1781683602,GaVRJ6UJRbqrDzstP/pbSuzHoRLMAC4Df2Gjm66OoRk=.1781683602,D3 Application,07 In Review,19/6/26 14:31,6,google,gmb,google_my_business,2026-06-17
+8942d879-5985-4468-95c5-c44389576305,BCS-0070,316065320.1781683602,GaVRJ6UJRbqrDzstP/pbSuzHoRLMAC4Df2Gjm66OoRk=.1781683602,D3 Application,07 In Review,17/6/26 16:21,6,google,gmb,google_my_business,2026-06-17
+c858909f-ac30-47e8-8751-fcab7aadb1d2,BCS-0071,316065320.1781683602,GaVRJ6UJRbqrDzstP/pbSuzHoRLMAC4Df2Gjm66OoRk=.1781683602,D3 Application,07 In Review,19/6/26 18:40,6,google,gmb,google_my_business,2026-06-17
+11831776-47e4-4665-a1f9-24db53e3d64f,BCS-0072,,,D4 Offer,08 Pending,16/6/26 22:48,0,(direct),(none),(not set),2026-06-16
+79e1c6ff-e4a0-431e-82f8-a1a6d7233aad,BCS-0073,,,D4 Offer,09 Sent,17/6/26 14:38,0,offline,offline,direct-application,2026-06-17
+a24695fd-6451-4ad4-9416-41cc04db38ce,BCS-0074,,,D5 Enrolment,11 Confirmed,15/6/26 20:38,0,offline,offline,direct-application,2026-06-15
