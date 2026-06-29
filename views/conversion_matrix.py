@@ -23,8 +23,8 @@ DIMENSION_CONFIG = {
     },
     "Ad Name (FB)": {
         "channel_filter": ["PaidSocial"],
-        "lookup_key": None,
-        "dimension_col": None,
+        "lookup_key": "meta_ad",
+        "dimension_col": "ad_name",
         "platform": "meta",
     },
 }

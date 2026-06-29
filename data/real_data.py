@@ -18,6 +18,7 @@ def load_bcs_data():
     for name, filename in [
         ("google_adgroup", "google_adgroup_lookup.csv"),
         ("meta_adset", "meta_adset_lookup.csv"),
+        ("meta_ad", "meta_ad_lookup.csv"),
         ("campaign_name_map", "campaign_name_map.csv"),
     ]:
         path = DATA_DIR / filename
