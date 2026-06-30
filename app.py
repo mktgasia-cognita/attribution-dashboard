@@ -71,11 +71,6 @@ st.markdown("""
         .stMetric label { font-size: 0.75rem !important; }
         .stMetric [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
     }
-    /* Mobile: 2-up KPI card grid */
-    @media (max-width: 480px) {
-        [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
-        [data-testid="stHorizontalBlock"] > div { flex: 0 0 48% !important; min-width: 48% !important; }
-    }
 </style>
 """, unsafe_allow_html=True)
 

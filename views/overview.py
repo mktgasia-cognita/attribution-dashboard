@@ -31,14 +31,45 @@ def render(data, filters):
     total_enrolments = attr[attr["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
     unique_journeys = journeys["journey_id"].nunique() if not journeys.empty else 0
 
-    st.markdown("##### Funnel")
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
-    c1.metric("Journeys", f"{unique_journeys:,}")
-    c2.metric("Leads", f"{total_leads:,.0f}")
-    c3.metric("Enquiries", f"{total_enquiries:,.0f}")
-    c4.metric("Applications", f"{total_applications:,.0f}")
-    c5.metric("Offers", f"{total_offers:,.0f}")
-    c6.metric("Enrolments", f"{total_enrolments:,.0f}")
+    st.markdown("""<style>
+    .kpi-grid { display: grid; gap: 12px; margin-bottom: 20px; }
+    .kpi-grid-6 { grid-template-columns: repeat(6, 1fr); }
+    .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .kpi-sect { font-size: 14px; font-weight: 600; color: #31333F; margin: 0 0 8px; }
+    .kpi-card { padding: 16px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .kpi-lbl { font-size: 13px; font-weight: 500; margin-bottom: 4px; opacity: 0.8; }
+    .kpi-val { font-size: 24px; font-weight: 600; }
+    @media (max-width: 768px) {
+        .kpi-grid-6 { grid-template-columns: repeat(3, 1fr); }
+        .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+        .kpi-grid-6, .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
+        .kpi-val { font-size: 18px; }
+        .kpi-lbl { font-size: 12px; }
+    }
+    </style>""", unsafe_allow_html=True)
+
+    funnel = [
+        ("Journeys", f"{unique_journeys:,}", "#E3EDF7", "#1a2a3a"),
+        ("Leads", f"{total_leads:,.0f}", "#C3D8ED", "#1a2a3a"),
+        ("Enquiries", f"{total_enquiries:,.0f}", "#8CB4DB", "#1e3a50"),
+        ("Applications", f"{total_applications:,.0f}", "#5A91C4", "#ffffff"),
+        ("Offers", f"{total_offers:,.0f}", "#3472A8", "#ffffff"),
+        ("Enrolments", f"{total_enrolments:,.0f}", "#1A5276", "#ffffff"),
+    ]
+    cards = ""
+    for lbl, val, bg, fg in funnel:
+        cards += (
+            f'<div class="kpi-card" style="background:{bg};color:{fg}">'
+            f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div></div>'
+        )
+    st.markdown(
+        f'<div class="kpi-sect">Funnel</div>'
+        f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
+        unsafe_allow_html=True,
+    )
 
     spend_df = data["spend"][data["spend"]["school"].isin(filters["schools"])]
     if not spend_df.empty:
@@ -46,12 +77,27 @@ def render(data, filters):
         cpl = total_spend / total_leads if total_leads > 0 else 0
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
         mer = (total_leads / total_spend * 1000) if total_spend > 0 else 0
-        st.markdown("##### Cost Efficiency")
-        s1, s2, s3, s4 = st.columns(4)
-        s1.metric("Spend (SGD)", f"{total_spend:,.0f}")
-        s2.metric("CPL (SGD)", f"{cpl:,.0f}" if total_leads > 0 else "N/A", help="Cost Per Lead (total spend / leads)")
-        s3.metric("CPEn (SGD)", f"{cpen:,.0f}" if total_enquiries > 0 else "N/A", help="Cost Per Enquiry (total spend / enquiries)")
-        s4.metric("MER", f"{mer:.1f}" if total_spend > 0 else "N/A", help="Leads per SGD 1,000 spend")
+        costs = [
+            ("Spend (SGD)", f"${total_spend:,.0f}", ""),
+            ("CPL (SGD)", f"${cpl:,.0f}" if total_leads > 0 else "N/A",
+             "Cost Per Lead (total spend / leads)"),
+            ("CPEn (SGD)", f"${cpen:,.0f}" if total_enquiries > 0 else "N/A",
+             "Cost Per Enquiry (total spend / enquiries)"),
+            ("MER", f"{mer:.1f}" if total_spend > 0 else "N/A",
+             "Leads per SGD 1,000 spend"),
+        ]
+        cards = ""
+        for lbl, val, tip in costs:
+            title_attr = f' title="{tip}"' if tip else ""
+            cards += (
+                f'<div class="kpi-card" style="background:#f8f9fa;color:#1a2a3a"{title_attr}>'
+                f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div></div>'
+            )
+        st.markdown(
+            f'<div class="kpi-sect">Cost Efficiency</div>'
+            f'<div class="kpi-grid kpi-grid-4">{cards}</div>',
+            unsafe_allow_html=True,
+        )
 
     st.divider()
 
