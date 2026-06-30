@@ -114,7 +114,9 @@ def render(data, filters):
     display_names.extend(["Source Path", "Medium Path", "Campaign Path"])
     detail = detail.sort_values("date", ascending=False).head(100)
     detail.columns = display_names
-    detail = detail.fillna("")
+    for col in ["Grade", "Nationality", "Adm. Status"]:
+        if col in detail.columns:
+            detail[col] = detail[col].fillna("")
 
     st.dataframe(detail, use_container_width=True, hide_index=True, height=400)
 
