@@ -9,6 +9,16 @@ def load_bcs_data():
     journeys_raw = pd.read_csv(DATA_DIR / "journeys_raw.csv", parse_dates=["date"])
     attributed = pd.read_csv(DATA_DIR / "attributed.csv", parse_dates=["date"])
 
+    enrichment_path = DATA_DIR / "d365_enrichment.csv"
+    d365_enrichment = None
+    if enrichment_path.exists():
+        d365_enrichment = pd.read_csv(enrichment_path)
+        enr_cols = ["journey_id", "applied_grade", "nationality",
+                    "admission_status", "academic_year", "address_country"]
+        enr = d365_enrichment[[c for c in enr_cols if c in d365_enrichment.columns]]
+        journeys_raw = journeys_raw.merge(enr, on="journey_id", how="left")
+        attributed = attributed.merge(enr, on="journey_id", how="left")
+
     spend = pd.read_csv(DATA_DIR / "spend.csv", parse_dates=["date"])
     search_terms = pd.read_csv(DATA_DIR / "search_terms.csv")
     landing_pages = pd.read_csv(DATA_DIR / "landing_pages.csv")
@@ -33,4 +43,5 @@ def load_bcs_data():
         "landing_pages": landing_pages,
         "weekly_goals": weekly_goals,
         "ad_lookups": ad_lookups,
+        "d365_enrichment": d365_enrichment,
     }
