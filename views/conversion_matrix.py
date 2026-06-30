@@ -3,7 +3,7 @@ import pandas as pd
 
 
 DIMENSION_CONFIG = {
-    "Ad Set (FB)": {
+    "Ad Set (Meta)": {
         "channel_filter": ["PaidSocial"],
         "lookup_key": "meta_adset",
         "dimension_col": "ad_set_name",
@@ -15,13 +15,13 @@ DIMENSION_CONFIG = {
         "dimension_col": "ad_group_name",
         "platform": "google",
     },
-    "Placement (FB)": {
+    "Placement (Meta)": {
         "channel_filter": ["PaidSocial"],
         "lookup_key": None,
         "dimension_col": None,
         "platform": "meta",
     },
-    "Ad Name (FB)": {
+    "Ad Name (Meta)": {
         "channel_filter": ["PaidSocial"],
         "lookup_key": "meta_ad",
         "dimension_col": "ad_name",
@@ -42,7 +42,7 @@ def render(data, filters):
 
     sub_tab = st.radio(
         "View",
-        ["Source/Medium/Campaign", "Over Time", "Ad Set (FB)", "Ad Group (Google CPC)", "Placement (FB)", "Ad Name (FB)"],
+        ["Source/Medium/Campaign", "Over Time", "Ad Set (Meta)", "Ad Group (Google CPC)", "Placement (Meta)", "Ad Name (Meta)"],
         horizontal=True,
     )
 
