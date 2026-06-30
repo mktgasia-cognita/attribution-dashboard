@@ -202,12 +202,15 @@ def _render_d365_enrichment(journeys, attr):
         fig = px.pie(
             nat_counts, values="Count", names="Nationality", hole=0.3,
         )
+        fig.update_traces(textposition="inside", textinfo="percent")
         fig.update_layout(
-            margin=dict(t=20, b=20, l=20, r=20),
-            height=350,
+            margin=dict(t=20, b=20, l=0, r=0),
+            height=400,
             showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.3,
-                        x=0.5, xanchor="center"),
+            legend=dict(
+                orientation="v", yanchor="middle", y=0.5,
+                xanchor="left", x=1.05, font=dict(size=10),
+            ),
         )
         st.plotly_chart(fig, use_container_width=True)
 

@@ -74,7 +74,7 @@ from utils.filters import render_sidebar
 from views import overview, conversion_matrix, opportunities, journeys, crm_journeys, search_terms, weekly_goals
 
 
-DATA_VERSION = "3"
+DATA_VERSION = "4"
 
 
 @st.cache_data
