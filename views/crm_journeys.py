@@ -114,6 +114,8 @@ def render(data, filters):
     display_names.extend(["Source Path", "Medium Path", "Campaign Path"])
     detail = detail.sort_values("date", ascending=False).head(100)
     detail.columns = display_names
+    if "Date" in detail.columns:
+        detail["Date"] = pd.to_datetime(detail["Date"]).dt.strftime("%Y-%m-%d")
     for col in ["Grade", "Nationality", "Adm. Status"]:
         if col in detail.columns:
             detail[col] = detail[col].fillna("")
@@ -176,9 +178,9 @@ def _render_d365_enrichment(journeys, attr):
         st.warning("No records match the selected grade/year filters.")
         return
 
-    col1, col2, col3 = st.columns(3)
+    row1_left, row1_right = st.columns(2)
 
-    with col1:
+    with row1_left:
         st.markdown("**Grade Distribution**")
         grade_counts = enriched["applied_grade"].value_counts().reset_index()
         grade_counts.columns = ["Grade", "Count"]
@@ -191,30 +193,11 @@ def _render_d365_enrichment(journeys, attr):
         fig.update_layout(
             margin=dict(t=20, b=80, l=20, r=20),
             height=350,
-            xaxis=dict(tickangle=-45),
+            xaxis=dict(tickangle=-45, categoryorder="array", categoryarray=grade_counts["Grade"].tolist()),
         )
         st.plotly_chart(fig, use_container_width=True)
 
-    with col2:
-        st.markdown("**Nationality Breakdown**")
-        nat_counts = enriched["nationality"].value_counts().reset_index()
-        nat_counts.columns = ["Nationality", "Count"]
-        fig = px.pie(
-            nat_counts, values="Count", names="Nationality", hole=0.3,
-        )
-        fig.update_traces(textposition="inside", textinfo="percent")
-        fig.update_layout(
-            margin=dict(t=20, b=100, l=20, r=20),
-            height=500,
-            showlegend=True,
-            legend=dict(
-                orientation="h", yanchor="top", y=-0.15,
-                x=0.5, xanchor="center", font=dict(size=10),
-            ),
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col3:
+    with row1_right:
         st.markdown("**Admission Status**")
         status_counts = enriched["admission_status"].value_counts().reset_index()
         status_counts.columns = ["Status", "Count"]
@@ -233,6 +216,24 @@ def _render_d365_enrichment(journeys, attr):
         )
         st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown("**Nationality Breakdown**")
+    nat_counts = enriched["nationality"].value_counts().reset_index()
+    nat_counts.columns = ["Nationality", "Count"]
+    fig = px.pie(
+        nat_counts, values="Count", names="Nationality", hole=0.3,
+    )
+    fig.update_traces(textposition="inside", textinfo="percent")
+    fig.update_layout(
+        margin=dict(t=20, b=20, l=20, r=20),
+        height=400,
+        showlegend=True,
+        legend=dict(
+            orientation="h", yanchor="top", y=-0.1,
+            x=0.5, xanchor="center", font=dict(size=11),
+        ),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
     st.markdown("**Grade x Channel**")
     enriched_attr = attr.dropna(subset=["applied_grade"])
     if selected_grades:
@@ -248,9 +249,11 @@ def _render_d365_enrichment(journeys, attr):
             aggfunc="sum",
         ).fillna(0).round(2)
         grade_channel["Total"] = grade_channel.sum(axis=1)
-        grade_channel = grade_channel.sort_values("Total", ascending=False)
+        grade_channel = grade_channel.reindex(
+            sorted(grade_channel.index, key=_grade_sort_key)
+        )
         st.dataframe(
-            grade_channel.style.background_gradient(cmap="Blues", axis=None),
+            grade_channel.style.format("{:.2f}").background_gradient(cmap="Blues", axis=None),
             use_container_width=True,
         )
     else:

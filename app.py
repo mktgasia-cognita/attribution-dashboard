@@ -66,6 +66,16 @@ st.markdown("""
     .js-plotly-plot {
         overflow: visible !important;
     }
+    /* Tablet: prevent KPI label truncation */
+    @media (max-width: 768px) {
+        .stMetric label { font-size: 0.75rem !important; }
+        .stMetric [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
+    }
+    /* Mobile: 2-up KPI card grid */
+    @media (max-width: 480px) {
+        [data-testid="stHorizontalBlock"] { flex-wrap: wrap !important; }
+        [data-testid="stHorizontalBlock"] > div { flex: 0 0 48% !important; min-width: 48% !important; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -103,7 +113,7 @@ dates = data["attributed"]["date"].dropna()
 if len(dates):
     date_min = dates.min().strftime("%b %-d")
     date_max = dates.max().strftime("%b %-d")
-    st.caption(f"Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4 | {date_min}–{date_max}")
+    st.caption(f"Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4 | {date_min}–{date_max} | Data refreshed weekly")
 else:
     st.caption("Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4")
 

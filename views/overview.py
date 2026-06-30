@@ -4,6 +4,15 @@ import plotly.graph_objects as go
 import pandas as pd
 from utils.channel_grouping import CHANNEL_COLORS
 
+COUNTRY_SHORT_NAMES = {
+    "Myanmar, Republic of the Union of": "Myanmar",
+    "Korea, Republic of": "South Korea",
+    "Taiwan, Province of China": "Taiwan",
+    "Viet Nam": "Vietnam",
+    "United States of America": "USA",
+    "United Kingdom of Great Britain and Northern Ireland": "United Kingdom",
+}
+
 
 def render(data, filters):
     from utils.filters import apply_filters
@@ -22,6 +31,7 @@ def render(data, filters):
     total_enrolments = attr[attr["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
     unique_journeys = journeys["journey_id"].nunique() if not journeys.empty else 0
 
+    st.markdown("##### Funnel")
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     c1.metric("Journeys", f"{unique_journeys:,}")
     c2.metric("Leads", f"{total_leads:,.0f}")
@@ -36,10 +46,11 @@ def render(data, filters):
         cpl = total_spend / total_leads if total_leads > 0 else 0
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
         mer = (total_leads / total_spend * 1000) if total_spend > 0 else 0
+        st.markdown("##### Cost Efficiency")
         s1, s2, s3, s4 = st.columns(4)
         s1.metric("Spend (SGD)", f"{total_spend:,.0f}")
-        s2.metric("CPL (SGD)", f"{cpl:,.0f}" if total_leads > 0 else "N/A")
-        s3.metric("CPEn (SGD)", f"{cpen:,.0f}" if total_enquiries > 0 else "N/A")
+        s2.metric("CPL (SGD)", f"{cpl:,.0f}" if total_leads > 0 else "N/A", help="Cost Per Lead (total spend / leads)")
+        s3.metric("CPEn (SGD)", f"{cpen:,.0f}" if total_enquiries > 0 else "N/A", help="Cost Per Enquiry (total spend / enquiries)")
         s4.metric("MER", f"{mer:.1f}" if total_spend > 0 else "N/A", help="Leads per SGD 1,000 spend")
 
     st.divider()
@@ -122,6 +133,9 @@ def render(data, filters):
         first_touches = journeys[journeys["touchpoint"] == 1]
         country_counts = first_touches["country"].value_counts().reset_index()
         country_counts.columns = ["Country", "Leads"]
+        country_counts["Country"] = country_counts["Country"].map(
+            lambda x: COUNTRY_SHORT_NAMES.get(x, x)
+        )
         fig_bar = px.bar(
             country_counts, x="Country", y="Leads",
             color_discrete_sequence=["#3498db"],
