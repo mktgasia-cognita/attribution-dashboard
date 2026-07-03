@@ -3,10 +3,13 @@ import pandas as pd
 
 
 def render(data, filters):
-    from utils.filters import apply_filters
+    from datetime import datetime
 
     goals = data["weekly_goals"]
     goals = goals[goals["school"].isin(filters["schools"])]
+    start_dt = pd.Timestamp(filters["start_date"])
+    end_dt = pd.Timestamp(filters["end_date"])
+    goals = goals[(goals["week_end"] >= start_dt) & (goals["week_start"] <= end_dt)]
 
     if goals.empty:
         st.warning("No weekly goals data for selected filters.")
