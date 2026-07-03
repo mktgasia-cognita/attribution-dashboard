@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 
 st.set_page_config(
@@ -79,11 +80,24 @@ from utils.filters import render_sidebar
 from views import overview, conversion_matrix, opportunities, journeys, crm_journeys, search_terms, weekly_goals
 
 
+def _data_source():
+    src = os.environ.get("DATA_SOURCE", "").lower()
+    if src:
+        return src
+    try:
+        return st.secrets.get("data_source", "csv").lower()
+    except Exception:
+        return "csv"
+
+
 DATA_VERSION = "5"
 
 
-@st.cache_data
+@st.cache_data(ttl=3600 if _data_source() == "bigquery" else None)
 def get_data(_version=DATA_VERSION):
+    if _data_source() == "bigquery":
+        from data.bigquery import load_bcs_data_from_bq
+        return load_bcs_data_from_bq()
     return load_bcs_data()
 
 
