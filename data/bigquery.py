@@ -8,15 +8,17 @@ CSV_DIR = Path(__file__).resolve().parent / "bcs_real"
 
 
 def _get_client():
+    import streamlit as st
     try:
-        import streamlit as st
-        sa = dict(st.secrets.get("gcp_service_account", {}))
-        if sa:
-            from google.oauth2 import service_account
-            creds = service_account.Credentials.from_service_account_info(sa)
-            return bigquery.Client(project=PROJECT, credentials=creds)
-    except Exception:
+        sa_section = st.secrets["gcp_service_account"]
+        sa = {k: str(v) for k, v in sa_section.items()}
+        from google.oauth2 import service_account
+        creds = service_account.Credentials.from_service_account_info(sa)
+        return bigquery.Client(project=PROJECT, credentials=creds)
+    except KeyError:
         pass
+    except Exception as e:
+        st.error(f"BQ auth failed: {type(e).__name__}: {e}")
     return bigquery.Client(project=PROJECT)
 
 
