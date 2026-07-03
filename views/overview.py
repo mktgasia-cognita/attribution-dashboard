@@ -71,7 +71,7 @@ def render(data, filters):
         unsafe_allow_html=True,
     )
 
-    spend_df = apply_filters(data["spend"], filters)
+    spend_df = apply_filters(data["spend"], filters, apply_channel=False)
     if not spend_df.empty:
         total_spend = spend_df["spend"].sum()
         cpl = total_spend / total_leads if total_leads > 0 else 0

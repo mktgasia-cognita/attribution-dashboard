@@ -6,7 +6,7 @@ def render(data, filters):
     from utils.filters import apply_filters
 
     attr = apply_filters(data["attributed"], filters)
-    spend_df = apply_filters(data["spend"], filters)
+    spend_df = apply_filters(data["spend"], filters, apply_channel=False)
     search_df = data["search_terms"][data["search_terms"]["school"].isin(filters["schools"])]
     landing_df = data["landing_pages"][data["landing_pages"]["school"].isin(filters["schools"])]
 

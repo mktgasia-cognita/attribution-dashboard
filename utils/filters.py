@@ -50,12 +50,12 @@ def render_sidebar(data):
     }
 
 
-def apply_filters(df, filters, date_col="date"):
+def apply_filters(df, filters, date_col="date", apply_channel=True):
     mask = (
         df["school"].isin(filters["schools"])
         & (df[date_col] >= datetime.combine(filters["start_date"], datetime.min.time()))
         & (df[date_col] <= datetime.combine(filters["end_date"], datetime.max.time()))
     )
-    if "channel_grouping" in df.columns:
+    if apply_channel and "channel_grouping" in df.columns:
         mask = mask & df["channel_grouping"].isin(filters["channels"])
     return df[mask].copy()
