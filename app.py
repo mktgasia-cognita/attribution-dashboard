@@ -111,7 +111,7 @@ PAGES = {
     "Weekly Goals": weekly_goals,
 }
 
-page = st.sidebar.radio("", list(PAGES.keys()), label_visibility="collapsed")
+page = st.sidebar.radio("Navigation", list(PAGES.keys()), label_visibility="collapsed")
 st.sidebar.divider()
 
 data = get_data()
