@@ -11,15 +11,17 @@ def _get_client():
     import streamlit as st
     try:
         sa_section = st.secrets["gcp_service_account"]
-        sa = {k: str(v) for k, v in sa_section.items()}
-        from google.oauth2 import service_account
-        creds = service_account.Credentials.from_service_account_info(sa)
-        return bigquery.Client(project=PROJECT, credentials=creds)
     except KeyError:
-        pass
-    except Exception as e:
-        st.error(f"BQ auth failed: {type(e).__name__}: {e}")
-    return bigquery.Client(project=PROJECT)
+        raise RuntimeError(
+            "Missing [gcp_service_account] in Streamlit secrets. "
+            "Set data_source = 'csv' to use CSV fallback."
+        )
+    sa = {k: str(v) for k, v in sa_section.items()}
+    if "private_key" in sa:
+        sa["private_key"] = sa["private_key"].replace("\\n", "\n")
+    from google.oauth2 import service_account
+    creds = service_account.Credentials.from_service_account_info(sa)
+    return bigquery.Client(project=PROJECT, credentials=creds)
 
 
 def _query(client, table):
