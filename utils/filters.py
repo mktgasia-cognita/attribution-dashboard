@@ -8,23 +8,23 @@ def render_sidebar(data):
     schools = sorted(data["attributed"]["school"].unique()) if len(data["attributed"]) else ["BCS"]
     selected_schools = st.sidebar.multiselect("School", schools, default=schools)
 
-    if len(data["attributed"]) and "date" in data["attributed"].columns:
-        dates = data["attributed"]["date"].dropna()
-        if len(dates):
-            data_min = dates.min()
-            data_max = dates.max()
-            if hasattr(data_min, "date"):
-                data_min = data_min.date()
-                data_max = data_max.date()
-            default_start = data_min
-            default_end = data_max
-            min_val = data_min
-            max_val = data_max
-        else:
-            default_start = datetime(2026, 3, 13)
-            default_end = datetime(2026, 6, 11)
-            min_val = datetime(2026, 1, 1)
-            max_val = datetime(2026, 6, 30)
+    all_dates = []
+    for key in ("attributed", "journeys_raw", "spend"):
+        df = data.get(key)
+        if df is not None and len(df) and "date" in df.columns:
+            all_dates.append(df["date"].dropna())
+    if all_dates:
+        import pandas as pd
+        combined = pd.concat(all_dates)
+        data_min = combined.min()
+        data_max = combined.max()
+        if hasattr(data_min, "date"):
+            data_min = data_min.date()
+            data_max = data_max.date()
+        default_start = data_min
+        default_end = data_max
+        min_val = data_min
+        max_val = data_max
     else:
         default_start = datetime(2026, 3, 13)
         default_end = datetime(2026, 6, 11)
