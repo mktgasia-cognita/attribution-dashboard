@@ -10,15 +10,19 @@ def render(data, filters):
         st.warning("No search term data for selected filters.")
         return
 
+    st.caption("Full period - not affected by the date filter")
+
     st.subheader("Match Type Costs")
     match_agg = search_df.groupby("match_type").agg(
         cost=("cost", "sum"),
         clicks=("clicks", "sum"),
         impressions=("impressions", "sum"),
     ).reset_index()
-    match_agg["cpc"] = (match_agg["cost"] / match_agg["clicks"].replace(0, 1)).round(2)
+    match_agg["cpc"] = match_agg.apply(
+        lambda r: round(r["cost"] / r["clicks"], 2) if r["clicks"] > 0 else None, axis=1
+    )
     match_agg["cost"] = match_agg["cost"].apply(lambda x: f"SGD {x:,.0f}")
-    match_agg["cpc"] = match_agg["cpc"].apply(lambda x: f"SGD {x:.2f}")
+    match_agg["cpc"] = match_agg["cpc"].apply(lambda x: f"SGD {x:.2f}" if pd.notna(x) else "N/A")
     match_agg.columns = ["Match Type", "Cost", "Clicks", "Impressions", "CPC"]
     st.dataframe(match_agg, use_container_width=True, hide_index=True)
 

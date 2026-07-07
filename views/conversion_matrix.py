@@ -107,17 +107,18 @@ def _render_dimension_matrix(attr, stages, dimension_label, ad_lookups):
         st.info(f"No {'/'.join(config['channel_filter'])} data for selected filters.")
         return
 
-    st.subheader(f"Attribution Matrix: {dimension_label}")
-
     lookup_key = config["lookup_key"]
     dimension_col = config["dimension_col"]
     lookup_df = ad_lookups.get(lookup_key) if lookup_key else None
     name_map_df = ad_lookups.get("campaign_name_map")
 
     if lookup_df is None or dimension_col is None:
-        st.caption("⚠️ Lookup data not available — showing campaign-level breakdown.")
+        st.subheader("Attribution Matrix: Campaign")
+        st.caption(f"⚠️ {dimension_label} lookup data not available — showing campaign-level breakdown instead.")
         _fallback_campaign_matrix(filtered, stages)
         return
+
+    st.subheader(f"Attribution Matrix: {dimension_label}")
 
     campaign_weights = filtered.groupby("campaign")["attribution_weight"].sum().reset_index()
     campaign_weights.columns = ["ga4_campaign", "attribution_weight"]

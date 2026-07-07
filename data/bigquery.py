@@ -6,6 +6,14 @@ PROJECT = "sustained-truck-487013-g7"
 DATASET = "bcs_attribution"
 CSV_DIR = Path(__file__).resolve().parent / "bcs_real"
 
+# Tables stamped per-run by the pipeline and filtered to the latest
+# complete run. weekly_goals / campaign_name_map / meta_ad lookups are
+# NOT in BQ - they load from repo CSVs (see load_bcs_data_from_bq).
+RUN_STAMPED_TABLES = {
+    "journeys_stitched", "attributed", "crm_leads", "spend_combined",
+    "search_terms", "landing_pages", "ad_lookups",
+}
+
 
 def _get_client():
     import streamlit as st
@@ -24,36 +32,72 @@ def _get_client():
     return bigquery.Client(project=PROJECT, credentials=creds)
 
 
-def _query(client, table):
+def _latest_complete_run(client):
+    """Return the pipeline_run_ts of the latest complete run, or None.
+
+    None means the pipeline_runs marker table does not exist yet (legacy
+    truncate-era data) - tables are then read unfiltered.
+    """
+    sql = f"""
+        SELECT pipeline_run_ts
+        FROM `{PROJECT}.{DATASET}.pipeline_runs`
+        WHERE status = 'complete'
+        ORDER BY pipeline_run_ts DESC
+        LIMIT 1
+    """
+    try:
+        df = client.query(sql).to_dataframe()
+    except Exception:
+        return None
+    if df.empty:
+        return None
+    return str(df["pipeline_run_ts"].iloc[0])
+
+
+def _query(client, table, run_ts=None):
     ref = f"`{PROJECT}.{DATASET}.{table}`"
+    if run_ts and table in RUN_STAMPED_TABLES:
+        # pipeline_runs stores the ts as STRING; stamped tables hold TIMESTAMP.
+        job_config = bigquery.QueryJobConfig(query_parameters=[
+            bigquery.ScalarQueryParameter("run_ts", "STRING", run_ts),
+        ])
+        sql = f"SELECT * FROM {ref} WHERE pipeline_run_ts = TIMESTAMP(@run_ts)"
+        return client.query(sql, job_config=job_config).to_dataframe()
     return client.query(f"SELECT * FROM {ref}").to_dataframe()
+
+
+def _naive_dates(df, col="date"):
+    """Parse a date column defensively: tz-aware values become naive."""
+    df[col] = pd.to_datetime(df[col])
+    try:
+        df[col] = df[col].dt.tz_localize(None)
+    except TypeError:
+        pass  # already naive
+    return df
 
 
 def load_bcs_data_from_bq():
     client = _get_client()
+    run_ts = _latest_complete_run(client)
 
-    journeys_raw = _query(client, "journeys_stitched")
-    journeys_raw["date"] = pd.to_datetime(journeys_raw["date"])
+    journeys_raw = _naive_dates(_query(client, "journeys_stitched", run_ts))
+    attributed = _naive_dates(_query(client, "attributed", run_ts))
 
-    attributed = _query(client, "attributed")
-    attributed["date"] = pd.to_datetime(attributed["date"])
-
-    d365_enrichment = _query(client, "crm_leads")
+    d365_enrichment = _query(client, "crm_leads", run_ts)
 
     enr_cols = ["journey_id", "applied_grade", "nationality",
                 "admission_status", "academic_year", "address_country"]
     enr = d365_enrichment[[c for c in enr_cols if c in d365_enrichment.columns]]
-    if not enr.empty:
+    if not enr.empty and "journey_id" in enr.columns:
         journeys_raw = journeys_raw.merge(enr, on="journey_id", how="left")
         attributed = attributed.merge(enr, on="journey_id", how="left")
 
-    spend = _query(client, "spend_combined")
-    spend["date"] = pd.to_datetime(spend["date"])
+    spend = _naive_dates(_query(client, "spend_combined", run_ts))
 
-    search_terms = _query(client, "search_terms")
-    landing_pages = _query(client, "landing_pages")
+    search_terms = _query(client, "search_terms", run_ts)
+    landing_pages = _query(client, "landing_pages", run_ts)
 
-    ad_lookups_raw = _query(client, "ad_lookups")
+    ad_lookups_raw = _query(client, "ad_lookups", run_ts)
     ad_lookups = {}
     if not ad_lookups_raw.empty:
         google = ad_lookups_raw[ad_lookups_raw["platform"] == "google"].copy()
@@ -91,4 +135,8 @@ def load_bcs_data_from_bq():
         "weekly_goals": weekly_goals,
         "ad_lookups": ad_lookups,
         "d365_enrichment": d365_enrichment,
+        # Freshness metadata for the UI: BQ run being served, plus which
+        # datasets still come from repo CSVs in BQ mode.
+        "bq_run_ts": run_ts,
+        "csv_sourced": ["weekly_goals", "campaign_name_map", "meta_ad lookup"],
     }

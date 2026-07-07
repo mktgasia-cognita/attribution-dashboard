@@ -1,3 +1,8 @@
+"""
+Canonical channel grouping logic for attribution pipeline and dashboard.
+Single source of truth - keep in sync with ../../channel_grouping.py
+"""
+
 import re
 
 BRAND_PATTERN = re.compile(r"brand|branded", re.IGNORECASE)
@@ -5,49 +10,50 @@ PMAX_PATTERN = re.compile(r"pmax|performance.max", re.IGNORECASE)
 COMPETITOR_PATTERN = re.compile(r"compet|rival", re.IGNORECASE)
 
 
-def classify_channel(source, medium, campaign):
-    source = str(source).lower().strip()
-    medium = str(medium).lower().strip()
-    campaign = str(campaign).lower().strip()
+def classify_channel(source, medium, campaign, ad_product_group=""):
+    s = str(source).lower().strip()
+    m = str(medium).lower().strip()
+    c = str(campaign).lower().strip()
+    apg = str(ad_product_group).lower().strip()
 
-    if source == "google" and "vd-" in campaign:
+    if s == "google" and "vd-" in c:
         return "PaidVideo"
-    if source == "stackadapt":
+    if s == "stackadapt":
         return "Display"
-    if "competition" in campaign:
-        return "PaidSearchCompetitor"
-    if medium == "offline":
+    if COMPETITOR_PATTERN.search(c):
+        return "CompetitorPaidSearch"
+    if m == "offline":
         return "Offline"
-    if source == "(direct)" and medium in ("(not set)", "(none)"):
+    if s == "(direct)" and m in ("(not set)", "(none)"):
         return "Direct"
-    if medium == "organic":
-        return "Organic Search"
-    if medium in ("cpc", "paid-social") and source in ("facebook", "tiktok", "instagram"):
-        return "Paid Social"
-    if "social" in medium:
+    if m == "gmb":
+        return "Local"
+    if m == "organic":
+        return "OrganicSearch"
+    if m in ("cpc", "paid-social") and s in ("facebook", "tiktok", "instagram"):
+        return "PaidSocial"
+    if "social" in m:
         return "Social"
-    if medium == "email":
+    if m == "email":
         return "Email"
-    if medium == "referral":
+    if m == "referral":
         return "Referral"
-
-    if medium in ("cpc", "ppc", "paidsearch"):
-        if BRAND_PATTERN.search(campaign):
+    if m in ("cpc", "ppc", "paidsearch"):
+        if BRAND_PATTERN.search(c) or BRAND_PATTERN.search(apg):
             return "BrandedPaidSearch"
-        if PMAX_PATTERN.search(campaign):
+        if PMAX_PATTERN.search(c):
             return "PMaxPaidSearch"
-        if COMPETITOR_PATTERN.search(campaign):
+        if COMPETITOR_PATTERN.search(c) or COMPETITOR_PATTERN.search(apg):
             return "CompetitorPaidSearch"
         return "GenericPaidSearch"
-
-    return "Other"
+    if m in ("display", "cpm", "banner"):
+        return "Display"
+    return "(Other)"
 
 
 CHANNEL_COLORS = {
-    "Organic Search": "#2ecc71",
     "OrganicSearch": "#2ecc71",
     "Direct": "#95a5a6",
-    "Paid Social": "#3498db",
     "PaidSocial": "#3498db",
     "GenericPaidSearch": "#e74c3c",
     "BrandedPaidSearch": "#e67e22",
@@ -60,6 +66,6 @@ CHANNEL_COLORS = {
     "PMaxPaidSearch": "#2980b9",
     "Offline": "#7f8c8d",
     "Local": "#27ae60",
-    "Other": "#bdc3c7",
+    "DemandGen": "#c0392b",
     "(Other)": "#bdc3c7",
 }

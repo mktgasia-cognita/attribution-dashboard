@@ -34,7 +34,12 @@ def render(data, filters):
 
     with col_left:
         st.subheader("Closed Reasons")
-        lost = journeys[journeys["status"] == "Lost"].dropna(subset=["closed_reason"])
+        # closed_reason is not in the BQ pipeline output (D365 exports carry
+        # no close reason) - guard for the column before using it.
+        if "closed_reason" in journeys.columns:
+            lost = journeys[journeys["status"] == "Lost"].dropna(subset=["closed_reason"])
+        else:
+            lost = journeys.iloc[0:0]
         if not lost.empty:
             reasons = lost["closed_reason"].value_counts().reset_index()
             reasons.columns = ["Reason", "Count"]
@@ -130,15 +135,30 @@ def _render_coverage_metric(data, journeys):
     if d365_enr is None or d365_enr.empty:
         return
 
+    # Numerator and denominator must share the user's filter scope -
+    # a filtered numerator against the full D365 file reads as a
+    # pipeline gap when it is just the date/channel filter.
+    filtered_ids = journeys["journey_id"].unique()
+    in_scope = d365_enr[d365_enr["journey_id"].isin(
+        data["journeys_raw"]["journey_id"].unique()
+    )]
     total_d365 = len(d365_enr)
-    matched = d365_enr["journey_id"].isin(journeys["journey_id"].unique()).sum()
-    pct = matched / total_d365 * 100 if total_d365 > 0 else 0
+    matched = d365_enr["journey_id"].isin(filtered_ids).sum()
 
-    st.info(
-        f"D365 Attribution Coverage: **{matched}** of **{total_d365}** "
-        f"D365 records matched to marketing journeys (**{pct:.0f}%**). "
-        f"Unmatched records are offline leads or forms without GA tracking."
-    )
+    if matched < total_d365 and len(in_scope) == total_d365:
+        # Everything matches over the full range; the gap is the filter.
+        st.info(
+            f"D365 Attribution Coverage: **{matched}** of **{total_d365}** "
+            f"D365 records fall inside the current filters "
+            f"(all {total_d365} match a marketing journey over the full range)."
+        )
+    else:
+        pct = matched / total_d365 * 100 if total_d365 > 0 else 0
+        st.info(
+            f"D365 Attribution Coverage: **{matched}** of **{total_d365}** "
+            f"D365 records matched to marketing journeys (**{pct:.0f}%**). "
+            f"Unmatched records are offline leads or forms without GA tracking."
+        )
 
 
 def _render_d365_enrichment(journeys, attr):

@@ -71,8 +71,20 @@ def render(data, filters):
         unsafe_allow_html=True,
     )
 
+    # Spend uses the ad-platform taxonomy, so it cannot follow the channel
+    # filter. Showing filtered leads against unfiltered spend produces wrong
+    # CPL/CPEn - hide the block instead when a channel filter is active.
+    all_channels = set(data["attributed"]["channel_grouping"].dropna().unique())
+    channel_filter_active = set(filters["channels"]) < all_channels
+
     spend_df = apply_filters(data["spend"], filters, apply_channel=False)
-    if not spend_df.empty:
+    if channel_filter_active:
+        st.caption(
+            "Cost Efficiency hidden while a channel filter is active: spend "
+            "cannot be split by these channels, so CPL/CPEn would divide "
+            "filtered leads by total spend."
+        )
+    elif not spend_df.empty:
         total_spend = spend_df["spend"].sum()
         cpl = total_spend / total_leads if total_leads > 0 else 0
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
@@ -83,7 +95,7 @@ def render(data, filters):
              "Cost Per Lead (total spend / leads)"),
             ("CPEn (SGD)", f"${cpen:,.0f}" if total_enquiries > 0 else "N/A",
              "Cost Per Enquiry (total spend / enquiries)"),
-            ("MER", f"{mer:.1f}" if total_spend > 0 else "N/A",
+            ("Leads/SGD 1k", f"{mer:.1f}" if total_spend > 0 else "N/A",
              "Leads per SGD 1,000 spend"),
         ]
         cards = ""
@@ -108,6 +120,12 @@ def render(data, filters):
         lead_attr = attr[(attr["stage"] == "D1 Lead") & (~attr["channel_grouping"].isin(["Offline", "(Other)"]))]
         channel_attr = lead_attr.groupby("channel_grouping")["attribution_weight"].sum().reset_index()
         channel_attr = channel_attr.sort_values("attribution_weight", ascending=False)
+        # Centre count and percentages must share the same base as the
+        # visible slices - Offline/(Other) are excluded above.
+        visible_leads = channel_attr["attribution_weight"].sum()
+        excluded_leads = total_leads - visible_leads
+        if excluded_leads > 0.5:
+            st.caption(f"Digital channels only - excludes Offline/(Other) ({excluded_leads:,.0f} of {total_leads:,.0f} leads)")
         colors = [CHANNEL_COLORS.get(ch, "#bdc3c7") for ch in channel_attr["channel_grouping"]]
         short_labels = {
             "BrandedPaidSearch": "Branded",
@@ -127,7 +145,7 @@ def render(data, filters):
             textposition="outside",
         ))
         fig_donut.add_annotation(
-            text=f"{total_leads:,.0f}<br>Leads",
+            text=f"{visible_leads:,.0f}<br>Leads",
             x=0.5, y=0.5, showarrow=False,
             font=dict(size=16, color="#2c3e50"),
         )

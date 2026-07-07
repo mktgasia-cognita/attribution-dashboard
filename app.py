@@ -90,12 +90,15 @@ def _data_source():
         return "csv"
 
 
-DATA_VERSION = "5"
+DATA_VERSION = "6"
 
 
 @st.cache_data(ttl=3600 if _data_source() == "bigquery" else None)
-def get_data(_version=DATA_VERSION):
-    if _data_source() == "bigquery":
+def get_data(version=DATA_VERSION, source=None):
+    # version + source are part of the cache key: bumping DATA_VERSION or
+    # switching data source invalidates cached data (underscore-prefixed
+    # params are excluded from Streamlit's cache key - do not rename back).
+    if source == "bigquery":
         from data.bigquery import load_bcs_data_from_bq
         return load_bcs_data_from_bq()
     return load_bcs_data()
@@ -114,16 +117,29 @@ PAGES = {
 page = st.sidebar.radio("Navigation", list(PAGES.keys()), label_visibility="collapsed")
 st.sidebar.divider()
 
-data = get_data()
+try:
+    data = get_data(source=_data_source())
+except Exception as exc:
+    st.error(
+        "Could not load dashboard data. If this is BigQuery mode, check the "
+        "service account secrets on Streamlit Cloud, or set data_source = "
+        "'csv' to use the bundled snapshot."
+    )
+    st.caption(f"Details: {type(exc).__name__}: {exc}")
+    st.stop()
+
 filters = render_sidebar(data)
 
 st.title("BCS Attribution Dashboard")
 dates = data["attributed"]["date"].dropna()
+caption = "Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4"
 if len(dates):
-    date_min = dates.min().strftime("%b %-d")
-    date_max = dates.max().strftime("%b %-d")
-    st.caption(f"Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4 | {date_min}–{date_max} | Data refreshed weekly")
+    caption += f" | {dates.min().strftime('%b %-d')}–{dates.max().strftime('%b %-d')}"
+run_ts = data.get("bq_run_ts")
+if run_ts:
+    caption += f" | Live BQ (run {run_ts[:10]}); weekly goals + campaign names from repo files"
 else:
-    st.caption("Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4")
+    caption += " | Data refreshed weekly"
+st.caption(caption)
 
 PAGES[page].render(data, filters)
