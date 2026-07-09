@@ -1,20 +1,39 @@
 import streamlit as st
+import pandas as pd
 from datetime import datetime, timedelta
 
 
-def render_sidebar(data):
+def render_sidebar(data, role=None):
     st.sidebar.header("Filters")
 
-    schools = sorted(data["attributed"]["school"].unique()) if len(data["attributed"]) else ["BCS"]
-    selected_schools = st.sidebar.multiselect("School", schools, default=schools)
+    all_schools = sorted(data["attributed"]["school"].unique()) if len(data["attributed"]) else ["BCS"]
+
+    if role and role.upper() in [s.upper() for s in all_schools]:
+        selected_schools = [role.upper()]
+        st.sidebar.info(f"School: {role.upper()}")
+    else:
+        selected_schools = st.sidebar.multiselect("School", all_schools, default=all_schools)
 
     all_dates = []
+    school_start_dates = {}
     for key in ("attributed", "journeys_raw", "spend"):
         df = data.get(key)
         if df is not None and len(df) and "date" in df.columns:
-            all_dates.append(df["date"].dropna())
+            if "school" in df.columns:
+                filtered = df[df["school"].isin(selected_schools)]
+            else:
+                filtered = df
+            if len(filtered):
+                all_dates.append(filtered["date"].dropna())
+            if "school" in df.columns:
+                for school, grp in df.groupby("school"):
+                    d = grp["date"].dropna().min()
+                    if pd.notna(d):
+                        d = d.date() if hasattr(d, "date") else d
+                        if school not in school_start_dates or d < school_start_dates[school]:
+                            school_start_dates[school] = d
+
     if all_dates:
-        import pandas as pd
         combined = pd.concat(all_dates)
         data_min = combined.min()
         data_max = combined.max()
@@ -38,6 +57,12 @@ def render_sidebar(data):
     with col2:
         end_date = st.date_input("End", value=default_end, min_value=min_val,
                                  max_value=max_val)
+
+    for school in sorted(selected_schools):
+        if school in school_start_dates:
+            st.sidebar.caption(
+                f"{school} data available from {school_start_dates[school].strftime('%d/%m/%Y')}"
+            )
 
     channels = sorted(data["attributed"]["channel_grouping"].unique()) if len(data["attributed"]) else []
     selected_channels = st.sidebar.multiselect("Channel", channels, default=channels)
