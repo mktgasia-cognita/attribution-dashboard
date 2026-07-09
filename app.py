@@ -18,11 +18,13 @@ def _authenticate():
     except KeyError:
         return True, "cognita"
 
+    creds_dict = {"usernames": dict(credentials.get("usernames", {}))}
+
     authenticator = stauth.Authenticate(
-        credentials=credentials,
-        cookie_name=cookie["name"],
-        cookie_key=cookie["key"],
-        cookie_expiry_days=cookie.get("expiry_days", 7),
+        creds_dict,
+        cookie["name"],
+        cookie["key"],
+        cookie.get("expiry_days", 7),
     )
 
     if not st.session_state.get("authentication_status"):
@@ -34,20 +36,20 @@ def _authenticate():
         </style>
         """, unsafe_allow_html=True)
 
-    authenticator.login("Login", "main")
+    name, authentication_status, username = authenticator.login("Login", "main")
 
-    if st.session_state.get("authentication_status") is None:
+    if authentication_status is None:
         st.caption("Contact your Cognita marketing team for login credentials.")
 
-    if st.session_state.get("authentication_status") is True:
+    if authentication_status is True:
         authenticator.logout("Logout", "sidebar")
-        roles = st.session_state.get("roles", [])
+        user_info = creds_dict["usernames"].get(username, {})
+        roles = user_info.get("roles", [])
         role = roles[0] if roles else "cognita"
-        name = st.session_state.get("name", "")
         st.sidebar.caption(f"Signed in as {name}")
         return True, role
 
-    if st.session_state.get("authentication_status") is False:
+    if authentication_status is False:
         st.error("Incorrect username or password")
 
     st.stop()
