@@ -18,7 +18,15 @@ def _authenticate():
     except KeyError:
         return True, "cognita"
 
-    creds_dict = {"usernames": dict(credentials.get("usernames", {}))}
+    creds_dict = {"usernames": {}}
+    for uname, udata in credentials.get("usernames", {}).items():
+        creds_dict["usernames"][uname] = {
+            "email": str(udata.get("email", "")),
+            "first_name": str(udata.get("first_name", "")),
+            "last_name": str(udata.get("last_name", "")),
+            "password": str(udata.get("password", "")),
+            "roles": list(udata.get("roles", [])),
+        }
 
     authenticator = stauth.Authenticate(
         creds_dict,
@@ -36,19 +44,25 @@ def _authenticate():
         </style>
         """, unsafe_allow_html=True)
 
-    name, authentication_status, username = authenticator.login("Login", "main")
+    try:
+        authenticator.login()
+    except Exception as e:
+        st.error(e)
 
-    if authentication_status is None:
+    if st.session_state.get("authentication_status") is None:
         st.caption("Contact your Cognita marketing team for login credentials.")
 
-    if authentication_status is True:
-        authenticator.logout("Logout", "sidebar")
+    if st.session_state.get("authentication_status"):
+        authenticator.logout()
+        username = st.session_state.get("username", "")
+        name = st.session_state.get("name", "")
         user_info = creds_dict["usernames"].get(username, {})
-        role = user_info.get("role", "cognita")
+        roles = user_info.get("roles", [])
+        role = roles[0] if roles else "cognita"
         st.sidebar.caption(f"Signed in as {name}")
         return True, role
 
-    if authentication_status is False:
+    if st.session_state.get("authentication_status") is False:
         st.error("Incorrect username or password")
 
     st.stop()
