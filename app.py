@@ -44,8 +44,7 @@ def _authenticate():
     if authentication_status is True:
         authenticator.logout("Logout", "sidebar")
         user_info = creds_dict["usernames"].get(username, {})
-        roles = user_info.get("roles", [])
-        role = roles[0] if roles else "cognita"
+        role = user_info.get("role", "cognita")
         st.sidebar.caption(f"Signed in as {name}")
         return True, role
 
