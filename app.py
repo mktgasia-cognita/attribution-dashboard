@@ -41,8 +41,16 @@ def _authenticate():
             .stApp {background-color: #fafbfc;}
             section[data-testid="stSidebar"] {display: none;}
             header[data-testid="stHeader"] {display: none;}
+            /* Centre and constrain login form width */
+            [data-testid="stForm"] {
+                max-width: 400px;
+                margin: 0 auto;
+            }
         </style>
         """, unsafe_allow_html=True)
+        st.markdown("<div style='padding-top: 12vh;'></div>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align:center;'>Cognita Attribution Dashboard</h3>",
+                    unsafe_allow_html=True)
 
     try:
         authenticator.login()
@@ -50,7 +58,9 @@ def _authenticate():
         st.error(e)
 
     if st.session_state.get("authentication_status") is None:
-        st.caption("Contact your Cognita marketing team for login credentials.")
+        st.markdown("<p style='text-align:center; color:#888; font-size:0.85rem;'>"
+                    "Contact your Cognita marketing team for login credentials.</p>",
+                    unsafe_allow_html=True)
 
     if st.session_state.get("authentication_status"):
         authenticator.logout()
