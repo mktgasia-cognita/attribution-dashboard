@@ -37,7 +37,8 @@ def _latest_complete_run(client):
         )
     """
     try:
-        df = client.query(sql).to_dataframe()
+        rows = client.query(sql).result()
+        df = pd.DataFrame([dict(row) for row in rows])
     except Exception:
         return None
     if df.empty or pd.isna(df["run_ts"].iloc[0]):
@@ -47,7 +48,8 @@ def _latest_complete_run(client):
 
 def _query(client, table):
     ref = f"`{PROJECT}.{DATASET}.{table}`"
-    return client.query(f"SELECT * FROM {ref}").to_dataframe()
+    rows = client.query(f"SELECT * FROM {ref}").result()
+    return pd.DataFrame([dict(row) for row in rows])
 
 
 def _naive_dates(df, col="date"):
