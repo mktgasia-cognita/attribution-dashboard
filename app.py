@@ -171,7 +171,7 @@ except Exception as exc:
 
 filters = render_sidebar(data, role=user_role)
 
-st.title("BCS Attribution Dashboard")
+st.title("Cognita Attribution Dashboard")
 dates = data["attributed"]["date"].dropna()
 caption = "Markov attribution (per-stage, campaign-level) — D365 + BigQuery GA4"
 if len(dates):
