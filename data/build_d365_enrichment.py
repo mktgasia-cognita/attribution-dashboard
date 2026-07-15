@@ -14,8 +14,8 @@ from pathlib import Path
 import pandas as pd
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-STITCHED_PATH = SCRIPT_DIR / "bcs_real" / "d365_bq_stitched.csv"
-OUTPUT_PATH = SCRIPT_DIR / "bcs_real" / "d365_enrichment.csv"
+STITCHED_PATH = SCRIPT_DIR / "school_data" / "d365_bq_stitched.csv"
+OUTPUT_PATH = SCRIPT_DIR / "school_data" / "d365_enrichment.csv"
 
 COLUMN_MAP = {
     "(Do Not Modify) Cognita Opportunity": "d365_id",
