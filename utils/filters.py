@@ -58,17 +58,17 @@ def render_sidebar(data, role=None):
         end_date = st.date_input("End", value=default_end, min_value=min_val,
                                  max_value=max_val)
 
+    from utils.currency import CURRENCIES
+    currency = st.sidebar.selectbox("Display Currency", CURRENCIES, index=0)
+
+    channels = sorted(data["attributed"]["channel_grouping"].unique()) if len(data["attributed"]) else []
+    selected_channels = st.sidebar.multiselect("Channel", channels, default=channels)
+
     for school in sorted(selected_schools):
         if school in school_start_dates:
             st.sidebar.caption(
                 f"{school} data available from {school_start_dates[school].strftime('%d/%m/%Y')}"
             )
-
-    channels = sorted(data["attributed"]["channel_grouping"].unique()) if len(data["attributed"]) else []
-    selected_channels = st.sidebar.multiselect("Channel", channels, default=channels)
-
-    from utils.currency import CURRENCIES
-    currency = st.sidebar.selectbox("Display Currency", CURRENCIES, index=0)
 
     return {
         "schools": selected_schools,
