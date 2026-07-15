@@ -108,6 +108,16 @@ st.markdown("""
     .js-plotly-plot {
         overflow: visible !important;
     }
+    /* Ensure sidebar dropdowns are visible */
+    section[data-testid="stSidebar"] [data-baseweb="popover"] {
+        z-index: 9999 !important;
+    }
+    section[data-testid="stSidebar"] {
+        overflow: visible !important;
+    }
+    section[data-testid="stSidebar"] > div:first-child {
+        overflow: visible !important;
+    }
     /* Tablet: prevent KPI label truncation */
     @media (max-width: 768px) {
         .stMetric label { font-size: 0.75rem !important; }
