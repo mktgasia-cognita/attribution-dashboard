@@ -60,7 +60,7 @@ def render(data, filters):
         styled = display.style.map(
             _color_status, subset=["Leads", "Spend", "CPA"]
         )
-        st.dataframe(styled, use_container_width=True, hide_index=True)
+        st.dataframe(styled, width="stretch", hide_index=True)
 
 
 def _traffic_light(actual, target):

@@ -72,7 +72,7 @@ def _render_main_matrix(attr, stages):
     st.subheader("Attribution Matrix: Source / Medium / Campaign")
     st.dataframe(
         matrix.style.format("{:.2f}").background_gradient(cmap="Blues", axis=None),
-        use_container_width=True,
+        width="stretch",
         height=600,
     )
 
@@ -95,7 +95,7 @@ def _render_over_time(attr, stages):
         monthly = monthly.sort_values("Total", ascending=False).head(20)
         st.dataframe(
             monthly.style.format("{:.2f}").background_gradient(cmap="Greens", axis=None),
-            use_container_width=True,
+            width="stretch",
         )
 
 
@@ -206,7 +206,7 @@ def _render_dimension_matrix(attr, stages, dimension_label, ad_lookups):
 
     st.dataframe(
         matrix.style.format("{:.2f}").background_gradient(cmap="Oranges", axis=None),
-        use_container_width=True,
+        width="stretch",
         height=500,
     )
 
@@ -225,6 +225,6 @@ def _fallback_campaign_matrix(filtered, stages):
 
     st.dataframe(
         matrix.style.format("{:.2f}").background_gradient(cmap="Oranges", axis=None),
-        use_container_width=True,
+        width="stretch",
         height=500,
     )

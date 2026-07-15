@@ -24,7 +24,7 @@ def render(data, filters):
     match_agg["cost"] = match_agg["cost"].apply(lambda x: f"SGD {x:,.0f}")
     match_agg["cpc"] = match_agg["cpc"].apply(lambda x: f"SGD {x:.2f}" if pd.notna(x) else "N/A")
     match_agg.columns = ["Match Type", "Cost", "Clicks", "Impressions", "CPC"]
-    st.dataframe(match_agg, use_container_width=True, hide_index=True)
+    st.dataframe(match_agg, width="stretch", hide_index=True)
 
     st.divider()
 
@@ -38,4 +38,4 @@ def render(data, filters):
     campaign_match = campaign_match.sort_values("cost", ascending=False).head(30)
     campaign_match["cost"] = campaign_match["cost"].apply(lambda x: f"SGD {x:,.0f}")
     campaign_match.columns = ["Match Type", "Campaign", "Search Terms", "Keyword", "Cost", "Clicks"]
-    st.dataframe(campaign_match, use_container_width=True, hide_index=True)
+    st.dataframe(campaign_match, width="stretch", hide_index=True)

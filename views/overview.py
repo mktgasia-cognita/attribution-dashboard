@@ -154,7 +154,7 @@ def render(data, filters):
             margin=dict(t=40, b=40, l=60, r=60),
             height=420,
         )
-        st.plotly_chart(fig_donut, use_container_width=True)
+        st.plotly_chart(fig_donut, width="stretch")
 
     with col_right:
         st.subheader("Leads Over Time")
@@ -178,7 +178,7 @@ def render(data, filters):
             legend=dict(orientation="h", yanchor="top", y=-0.15, x=0.5, xanchor="center"),
             xaxis=dict(tickformat="%b %d", tickangle=-45),
         )
-        st.plotly_chart(fig_line, use_container_width=True)
+        st.plotly_chart(fig_line, width="stretch")
 
     st.subheader("Top Sources of Enquiries")
     d2_attr = attr[(attr["stage"] == "D2 Enquiry") & (~attr["channel_grouping"].isin(["Offline", "(Other)"]))]
@@ -188,7 +188,7 @@ def render(data, filters):
     top_sources = top_sources.sort_values("attributed_conversions", ascending=False).head(20)
     top_sources["attributed_conversions"] = top_sources["attributed_conversions"].round(2)
     top_sources.columns = ["Channel", "Campaign", "Attributed Conversions"]
-    st.dataframe(top_sources, use_container_width=True, hide_index=True)
+    st.dataframe(top_sources, width="stretch", hide_index=True)
 
     st.divider()
 
@@ -209,4 +209,4 @@ def render(data, filters):
             height=350,
             xaxis=dict(tickangle=-45),
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width="stretch")

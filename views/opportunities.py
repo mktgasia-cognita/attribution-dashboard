@@ -33,7 +33,7 @@ def render(data, filters):
         if increase.empty:
             st.info("No channels currently meet the scale criteria.")
         else:
-            st.dataframe(_format_perf(increase), use_container_width=True, hide_index=True)
+            st.dataframe(_format_perf(increase), width="stretch", hide_index=True)
 
     with col_right:
         st.subheader("DECREASE - Review These Campaigns")
@@ -56,7 +56,7 @@ def render(data, filters):
         if decrease.empty:
             st.info("No channels currently flagged for review.")
         else:
-            st.dataframe(_format_perf(decrease), use_container_width=True, hide_index=True)
+            st.dataframe(_format_perf(decrease), width="stretch", hide_index=True)
 
     st.divider()
 
@@ -82,7 +82,7 @@ def render(data, filters):
         kw_agg["cpa"] = kw_agg["cpa"].apply(lambda x: f"SGD {x:,.0f}" if pd.notna(x) else "N/A")
         kw_agg = kw_agg[["keyword", "conversions", "cost", "clicks", "impressions", "ctr", "cpa"]]
         kw_agg.columns = ["Keyword", "Conversions", "Cost", "Clicks", "Impressions", "CTR %", "CPA"]
-        st.dataframe(kw_agg, use_container_width=True, hide_index=True)
+        st.dataframe(kw_agg, width="stretch", hide_index=True)
 
     with col_content:
         st.subheader("Top Content")
@@ -97,7 +97,7 @@ def render(data, filters):
         lp["conversion_rate"] = lp["conversion_rate"].apply(lambda x: f"{x:.1f}%")
         lp = lp[["landing_page", "sessions", "conversions", "conversion_rate"]]
         lp.columns = ["Landing Page", "Sessions", "Conversions", "Conv Rate"]
-        st.dataframe(lp, use_container_width=True, hide_index=True)
+        st.dataframe(lp, width="stretch", hide_index=True)
 
     st.divider()
     st.subheader("Keyword x Content Combinations")
@@ -110,7 +110,7 @@ def render(data, filters):
     combos = combos[combos["conversions"] > 0].sort_values("conversions", ascending=False).head(20)
     combos["cost"] = combos["cost"].apply(lambda x: f"SGD {x:,.0f}")
     combos.columns = ["Keyword", "Campaign", "Cost", "Conversions", "Clicks"]
-    st.dataframe(combos, use_container_width=True, hide_index=True)
+    st.dataframe(combos, width="stretch", hide_index=True)
 
 
 def _build_campaign_performance(attr, spend_df):

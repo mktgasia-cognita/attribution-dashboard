@@ -164,7 +164,7 @@ def _render_sankey(journeys, dimension, color_map, threshold_pct=0.01):
         plot_bgcolor="white",
         annotations=annotations,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _render_detail_table(journeys, dimension, label):
@@ -191,7 +191,7 @@ def _render_detail_table(journeys, dimension, label):
         table[col] = table[col].astype(int)
 
     table = table.sort_values("Last Touch", ascending=False)
-    st.dataframe(table, use_container_width=True, hide_index=True)
+    st.dataframe(table, width="stretch", hide_index=True)
 
 
 def _generate_source_colors(sources):

@@ -50,7 +50,7 @@ def render(data, filters):
                 showlegend=True,
                 legend=dict(orientation="h", yanchor="bottom", y=-0.3, x=0.5, xanchor="center"),
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         else:
             st.info("No lost journeys in selected range.")
 
@@ -93,7 +93,7 @@ def render(data, filters):
 
         st.dataframe(
             matrix.style.background_gradient(cmap="YlOrRd", axis=None),
-            use_container_width=True,
+            width="stretch",
             height=400,
         )
 
@@ -125,7 +125,7 @@ def render(data, filters):
         if col in detail.columns:
             detail[col] = detail[col].fillna("")
 
-    st.dataframe(detail, use_container_width=True, hide_index=True, height=400)
+    st.dataframe(detail, width="stretch", hide_index=True, height=400)
 
     _render_d365_enrichment(journeys, attr)
 
@@ -215,7 +215,7 @@ def _render_d365_enrichment(journeys, attr):
             height=350,
             xaxis=dict(tickangle=-45, categoryorder="array", categoryarray=grade_counts["Grade"].tolist()),
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with row1_right:
         st.markdown("**Admission Status**")
@@ -234,7 +234,7 @@ def _render_d365_enrichment(journeys, attr):
             margin=dict(t=20, b=20, l=100, r=20),
             height=350,
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     st.markdown("**Nationality Breakdown**")
     nat_counts = enriched["nationality"].value_counts().reset_index()
@@ -252,7 +252,7 @@ def _render_d365_enrichment(journeys, attr):
             x=0.5, xanchor="center", font=dict(size=11),
         ),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     st.markdown("**Grade x Channel**")
     enriched_attr = attr.dropna(subset=["applied_grade"])
@@ -274,7 +274,7 @@ def _render_d365_enrichment(journeys, attr):
         )
         st.dataframe(
             grade_channel.style.format("{:.2f}").background_gradient(cmap="Blues", axis=None),
-            use_container_width=True,
+            width="stretch",
         )
     else:
         st.info("No attributed data for the selected filters.")
