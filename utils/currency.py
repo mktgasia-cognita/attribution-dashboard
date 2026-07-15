@@ -1,6 +1,8 @@
 FX_FROM_SGD = {
     "SGD": 1.0,
     "USD": 1 / 1.32,
+    "VND": 19_500 / 1.32,
+    "GBP": 1 / 1.72,
 }
 
 CURRENCIES = list(FX_FROM_SGD.keys())
