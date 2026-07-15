@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from utils.currency import fmt
 
 
 def render(data, filters):
@@ -33,7 +34,7 @@ def render(data, filters):
         if increase.empty:
             st.info("No channels currently meet the scale criteria.")
         else:
-            st.dataframe(_format_perf(increase), width="stretch", hide_index=True)
+            st.dataframe(_format_perf(increase, filters["currency"]), width="stretch", hide_index=True)
 
     with col_right:
         st.subheader("DECREASE - Review These Campaigns")
@@ -56,7 +57,7 @@ def render(data, filters):
         if decrease.empty:
             st.info("No channels currently flagged for review.")
         else:
-            st.dataframe(_format_perf(decrease), width="stretch", hide_index=True)
+            st.dataframe(_format_perf(decrease, filters["currency"]), width="stretch", hide_index=True)
 
     st.divider()
 
@@ -78,8 +79,9 @@ def render(data, filters):
             lambda r: round(r["clicks"] / r["impressions"] * 100, 1) if r["impressions"] > 0 else 0.0, axis=1
         )
         kw_agg = kw_agg.sort_values("conversions", ascending=False).head(20)
-        kw_agg["cost"] = kw_agg["cost"].apply(lambda x: f"SGD {x:,.0f}")
-        kw_agg["cpa"] = kw_agg["cpa"].apply(lambda x: f"SGD {x:,.0f}" if pd.notna(x) else "N/A")
+        c = filters["currency"]
+        kw_agg["cost"] = kw_agg["cost"].apply(lambda x: fmt(x, c))
+        kw_agg["cpa"] = kw_agg["cpa"].apply(lambda x: fmt(x, c) if pd.notna(x) else "N/A")
         kw_agg = kw_agg[["keyword", "conversions", "cost", "clicks", "impressions", "ctr", "cpa"]]
         kw_agg.columns = ["Keyword", "Conversions", "Cost", "Clicks", "Impressions", "CTR %", "CPA"]
         st.dataframe(kw_agg, width="stretch", hide_index=True)
@@ -108,7 +110,7 @@ def render(data, filters):
         clicks=("clicks", "sum"),
     ).reset_index()
     combos = combos[combos["conversions"] > 0].sort_values("conversions", ascending=False).head(20)
-    combos["cost"] = combos["cost"].apply(lambda x: f"SGD {x:,.0f}")
+    combos["cost"] = combos["cost"].apply(lambda x: fmt(x, filters["currency"]))
     combos.columns = ["Keyword", "Campaign", "Cost", "Conversions", "Clicks"]
     st.dataframe(combos, width="stretch", hide_index=True)
 
@@ -151,11 +153,11 @@ def _build_campaign_performance(attr, spend_df):
     return perf
 
 
-def _format_perf(df):
+def _format_perf(df, currency="SGD"):
     out = df[["channel_grouping", "spend", "conversions", "cpa", "impression_share"]].copy()
-    out["spend"] = out["spend"].apply(lambda x: f"SGD {x:,.0f}")
+    out["spend"] = out["spend"].apply(lambda x: fmt(x, currency))
     out["conversions"] = out["conversions"].apply(lambda x: f"{x:.2f}" if x < 1 else f"{x:.1f}")
-    out["cpa"] = out["cpa"].apply(lambda x: f"SGD {x:,.0f}" if pd.notna(x) else "N/A")
+    out["cpa"] = out["cpa"].apply(lambda x: fmt(x, currency) if pd.notna(x) else "N/A")
     out["impression_share"] = out["impression_share"].apply(lambda x: f"{x:.1f}%")
     out.columns = ["Channel", "Spend", "Conversions", "CPA", "Share of Impressions"]
     return out

@@ -1,11 +1,11 @@
 import pandas as pd
 from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parent / "bcs_real"
+DATA_DIR = Path(__file__).resolve().parent / "school_data"
 
 
 
-def load_bcs_data():
+def load_data():
     journeys_raw = pd.read_csv(DATA_DIR / "journeys_raw.csv", parse_dates=["date"])
     attributed = pd.read_csv(DATA_DIR / "attributed.csv", parse_dates=["date"])
 

@@ -116,7 +116,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-from data.real_data import load_bcs_data
+from data.real_data import load_data
 from utils.filters import render_sidebar
 from views import overview, conversion_matrix, opportunities, journeys, crm_journeys, search_terms, weekly_goals
 
@@ -140,9 +140,9 @@ def get_data(version=DATA_VERSION, source=None):
     # switching data source invalidates cached data (underscore-prefixed
     # params are excluded from Streamlit's cache key - do not rename back).
     if source == "bigquery":
-        from data.bigquery import load_bcs_data_from_bq
-        return load_bcs_data_from_bq()
-    return load_bcs_data()
+        from data.bigquery import load_data_from_bq
+        return load_data_from_bq()
+    return load_data()
 
 
 PAGES = {

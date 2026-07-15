@@ -3,6 +3,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from utils.channel_grouping import CHANNEL_COLORS
+from utils.currency import fmt
 
 COUNTRY_SHORT_NAMES = {
     "Myanmar, Republic of the Union of": "Myanmar",
@@ -89,14 +90,15 @@ def render(data, filters):
         cpl = total_spend / total_leads if total_leads > 0 else 0
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
         mer = (total_leads / total_spend * 1000) if total_spend > 0 else 0
+        c = filters["currency"]
         costs = [
-            ("Spend (SGD)", f"${total_spend:,.0f}", ""),
-            ("CPL (SGD)", f"${cpl:,.0f}" if total_leads > 0 else "N/A",
+            ("Spend", fmt(total_spend, c), ""),
+            ("CPL", fmt(cpl, c) if total_leads > 0 else "N/A",
              "Cost Per Lead (total spend / leads)"),
-            ("CPEn (SGD)", f"${cpen:,.0f}" if total_enquiries > 0 else "N/A",
+            ("CPEn", fmt(cpen, c) if total_enquiries > 0 else "N/A",
              "Cost Per Enquiry (total spend / enquiries)"),
-            ("Leads/SGD 1k", f"{mer:.1f}" if total_spend > 0 else "N/A",
-             "Leads per SGD 1,000 spend"),
+            (f"Leads/{c} 1k", f"{mer:.1f}" if total_spend > 0 else "N/A",
+             f"Leads per {c} 1,000 spend"),
         ]
         cards = ""
         for lbl, val, tip in costs:

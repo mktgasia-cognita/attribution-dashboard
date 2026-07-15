@@ -3,15 +3,12 @@ from pathlib import Path
 from google.cloud import bigquery
 
 PROJECT = "sustained-truck-487013-g7"
-DATASET = "bcs_attribution"
-CSV_DIR = Path(__file__).resolve().parent / "bcs_real"
+DATASET = "cognita_attribution"
+CSV_DIR = Path(__file__).resolve().parent / "school_data"
 
-# Tables stamped per-run by the pipeline and filtered to the latest
-# complete run. weekly_goals / campaign_name_map / meta_ad lookups are
-# NOT in BQ - they load from repo CSVs (see load_bcs_data_from_bq).
 RUN_STAMPED_TABLES = {
-    "journeys_stitched", "attributed", "crm_leads", "spend_combined",
-    "search_terms", "landing_pages", "ad_lookups",
+    "v_journeys_stitched", "v_attributed", "v_crm_leads", "v_spend_combined",
+    "v_search_terms", "v_landing_pages", "v_ad_lookups",
 }
 
 
@@ -39,19 +36,20 @@ def _latest_complete_run(client):
     truncate-era data) - tables are then read unfiltered.
     """
     sql = f"""
-        SELECT pipeline_run_ts
-        FROM `{PROJECT}.{DATASET}.pipeline_runs`
-        WHERE status = 'complete'
-        ORDER BY pipeline_run_ts DESC
-        LIMIT 1
+        SELECT MIN(latest_ts) AS run_ts FROM (
+            SELECT school, MAX(pipeline_run_ts) AS latest_ts
+            FROM `{PROJECT}.{DATASET}.v_pipeline_latest`
+            WHERE status = 'complete'
+            GROUP BY school
+        )
     """
     try:
         df = client.query(sql).to_dataframe()
     except Exception:
         return None
-    if df.empty:
+    if df.empty or pd.isna(df["run_ts"].iloc[0]):
         return None
-    return str(df["pipeline_run_ts"].iloc[0])
+    return str(df["run_ts"].iloc[0])
 
 
 def _query(client, table, run_ts=None):
@@ -76,14 +74,14 @@ def _naive_dates(df, col="date"):
     return df
 
 
-def load_bcs_data_from_bq():
+def load_data_from_bq():
     client = _get_client()
     run_ts = _latest_complete_run(client)
 
-    journeys_raw = _naive_dates(_query(client, "journeys_stitched", run_ts))
-    attributed = _naive_dates(_query(client, "attributed", run_ts))
+    journeys_raw = _naive_dates(_query(client, "v_journeys_stitched", run_ts))
+    attributed = _naive_dates(_query(client, "v_attributed", run_ts))
 
-    d365_enrichment = _query(client, "crm_leads", run_ts)
+    d365_enrichment = _query(client, "v_crm_leads", run_ts)
 
     enr_cols = ["journey_id", "applied_grade", "nationality",
                 "admission_status", "academic_year", "address_country"]
@@ -92,12 +90,12 @@ def load_bcs_data_from_bq():
         journeys_raw = journeys_raw.merge(enr, on="journey_id", how="left")
         attributed = attributed.merge(enr, on="journey_id", how="left")
 
-    spend = _naive_dates(_query(client, "spend_combined", run_ts))
+    spend = _naive_dates(_query(client, "v_spend_combined", run_ts))
 
-    search_terms = _query(client, "search_terms", run_ts)
-    landing_pages = _query(client, "landing_pages", run_ts)
+    search_terms = _query(client, "v_search_terms", run_ts)
+    landing_pages = _query(client, "v_landing_pages", run_ts)
 
-    ad_lookups_raw = _query(client, "ad_lookups", run_ts)
+    ad_lookups_raw = _query(client, "v_ad_lookups", run_ts)
     ad_lookups = {}
     if not ad_lookups_raw.empty:
         google = ad_lookups_raw[ad_lookups_raw["platform"] == "google"].copy()

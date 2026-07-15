@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from utils.currency import fmt
 
 
 def render(data, filters):
@@ -21,8 +22,9 @@ def render(data, filters):
     match_agg["cpc"] = match_agg.apply(
         lambda r: round(r["cost"] / r["clicks"], 2) if r["clicks"] > 0 else None, axis=1
     )
-    match_agg["cost"] = match_agg["cost"].apply(lambda x: f"SGD {x:,.0f}")
-    match_agg["cpc"] = match_agg["cpc"].apply(lambda x: f"SGD {x:.2f}" if pd.notna(x) else "N/A")
+    c = filters["currency"]
+    match_agg["cost"] = match_agg["cost"].apply(lambda x: fmt(x, c))
+    match_agg["cpc"] = match_agg["cpc"].apply(lambda x: fmt(x, c, decimals=2) if pd.notna(x) else "N/A")
     match_agg.columns = ["Match Type", "Cost", "Clicks", "Impressions", "CPC"]
     st.dataframe(match_agg, width="stretch", hide_index=True)
 
@@ -36,6 +38,6 @@ def render(data, filters):
         clicks=("clicks", "sum"),
     ).reset_index()
     campaign_match = campaign_match.sort_values("cost", ascending=False).head(30)
-    campaign_match["cost"] = campaign_match["cost"].apply(lambda x: f"SGD {x:,.0f}")
+    campaign_match["cost"] = campaign_match["cost"].apply(lambda x: fmt(x, c))
     campaign_match.columns = ["Match Type", "Campaign", "Search Terms", "Keyword", "Cost", "Clicks"]
     st.dataframe(campaign_match, width="stretch", hide_index=True)

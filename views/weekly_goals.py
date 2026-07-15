@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from utils.currency import fmt
 
 
 def render(data, filters):
@@ -38,10 +39,11 @@ def render(data, filters):
         display["week_start"] = display["week_start"].dt.strftime("%d %b")
         display["lead_target"] = display["lead_target"].apply(lambda x: f"{x:.1f}")
         display["lead_actual"] = display["lead_actual"].apply(lambda x: f"{x:.1f}")
-        display["spend_target"] = display["spend_target"].apply(lambda x: f"SGD {x:,.0f}")
-        display["spend_actual"] = display["spend_actual"].apply(lambda x: f"SGD {x:,.0f}")
-        display["cpa_target"] = display["cpa_target"].apply(lambda x: f"SGD {x:,.0f}")
-        display["cpa_actual"] = display["cpa_actual"].apply(lambda x: f"SGD {x:,.0f}")
+        c = filters["currency"]
+        display["spend_target"] = display["spend_target"].apply(lambda x: fmt(x, c))
+        display["spend_actual"] = display["spend_actual"].apply(lambda x: fmt(x, c))
+        display["cpa_target"] = display["cpa_target"].apply(lambda x: fmt(x, c))
+        display["cpa_actual"] = display["cpa_actual"].apply(lambda x: fmt(x, c))
 
         display.columns = [
             "Week", "Lead Target", "Lead Actual", "Leads",

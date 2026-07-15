@@ -67,11 +67,15 @@ def render_sidebar(data, role=None):
     channels = sorted(data["attributed"]["channel_grouping"].unique()) if len(data["attributed"]) else []
     selected_channels = st.sidebar.multiselect("Channel", channels, default=channels)
 
+    from utils.currency import CURRENCIES
+    currency = st.sidebar.selectbox("Display Currency", CURRENCIES, index=0)
+
     return {
         "schools": selected_schools,
         "start_date": start_date,
         "end_date": end_date,
         "channels": selected_channels,
+        "currency": currency,
     }
 
 
