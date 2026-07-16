@@ -69,20 +69,21 @@ def render(data, filters):
             ]
         stitch_total = len(stitch)
         has_entry_type = "entry_type" in stitch.columns
-        full_attr = stitch[stitch["bq_sessions_found"] > 0]
-        partial_attr = stitch[
-            (stitch["bq_sessions_found"] == 0)
-            & (~stitch["first_touch_source"].isin(["(direct)", "offline", ""]))
-            & (stitch["first_touch_source"].notna())
-        ]
         if has_entry_type:
-            offline_attr = stitch[stitch["entry_type"] == "offline"]
-            unknown_attr = stitch_total - len(full_attr) - len(partial_attr) - len(offline_attr)
+            webform_stitch = stitch[stitch["entry_type"] == "webform"]
+            offline_attr = stitch[stitch["entry_type"] != "webform"]
         else:
+            webform_stitch = stitch
             offline_attr = pd.DataFrame()
-            unknown_attr = stitch_total - len(full_attr) - len(partial_attr)
+        full_attr = webform_stitch[webform_stitch["bq_sessions_found"] > 0]
+        partial_attr = webform_stitch[
+            (webform_stitch["bq_sessions_found"] == 0)
+            & (~webform_stitch["first_touch_source"].isin(["(direct)", "offline", ""]))
+            & (webform_stitch["first_touch_source"].notna())
+        ]
+        unknown_attr = len(webform_stitch) - len(full_attr) - len(partial_attr)
         tracked_count = len(full_attr) + len(partial_attr)
-        webform_base = stitch_total - len(offline_attr) if has_entry_type else stitch_total
+        webform_base = len(webform_stitch)
         trackable_pct = (tracked_count / webform_base * 100) if webform_base > 0 else 0
 
         avg_days = None
