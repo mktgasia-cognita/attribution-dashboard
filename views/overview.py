@@ -105,7 +105,7 @@ def render(data, filters):
         )
         summary = [
             ("Trackable", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
-            ("Avg. Days to Enquiry", days_str, "#f8f9fa", "#1a2a3a"),
+            ("Avg. Days to Lead", days_str, "#f8f9fa", "#1a2a3a"),
         ]
         cards = ""
         for lbl, val, bg, fg in summary:
