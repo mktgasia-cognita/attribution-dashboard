@@ -61,6 +61,7 @@ def render(data, filters):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
         if "created_on" in stitch.columns:
             stitch["created_on"] = pd.to_datetime(stitch["created_on"], errors="coerce")
+            stitch = stitch[stitch["created_on"].notna()]
             stitch = stitch[
                 (stitch["created_on"] >= pd.Timestamp(filters["start_date"]))
                 & (stitch["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
@@ -134,6 +135,7 @@ def render(data, filters):
             crm_raw = crm_raw[crm_raw["school"].isin(filters["schools"])]
         if "created_on" in crm_raw.columns:
             crm_raw["created_on"] = pd.to_datetime(crm_raw["created_on"], errors="coerce")
+            crm_raw = crm_raw[crm_raw["created_on"].notna()]
             crm_raw = crm_raw[
                 (crm_raw["created_on"] >= pd.Timestamp(filters["start_date"]))
                 & (crm_raw["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
