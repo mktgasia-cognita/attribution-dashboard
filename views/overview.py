@@ -55,6 +55,7 @@ def render(data, filters):
 
     # --- Data Completeness Section ---
     stitch = data.get("stitch_audit", pd.DataFrame())
+    tracked_count = 0
     if not stitch.empty:
         if "school" in filters and filters.get("schools"):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
@@ -66,7 +67,8 @@ def render(data, filters):
             & (stitch["first_touch_source"].notna())
         ]
         unknown_attr = stitch_total - len(full_attr) - len(partial_attr)
-        trackable_pct = ((len(full_attr) + len(partial_attr)) / stitch_total * 100) if stitch_total > 0 else 0
+        tracked_count = len(full_attr) + len(partial_attr)
+        trackable_pct = (tracked_count / stitch_total * 100) if stitch_total > 0 else 0
 
         avg_days = None
         if "created_on" in stitch.columns and "first_touch_date" in stitch.columns:
@@ -77,12 +79,6 @@ def render(data, filters):
             if not valid.empty:
                 avg_days = (valid["created_on"] - valid["first_touch_date"]).dt.days.mean()
 
-        section_guide(
-            "<strong>Full Attribution</strong> = visitor matched to GA4 sessions (multi-touch journey). "
-            "<strong>Partial</strong> = UTM data but no session match (single-touch). "
-            "<strong>Unknown</strong> = no digital signal, defaults to Direct. "
-            "<strong>Trackable %</strong> = Full + Partial as % of total."
-        )
         days_str = f"{avg_days:.0f}" if avg_days is not None else "N/A"
         completeness = [
             ("Total Leads", f"{stitch_total:,}", "#f8f9fa", "#1a2a3a"),
@@ -101,6 +97,12 @@ def render(data, filters):
             f'<div class="kpi-grid kpi-grid-4">{cards}</div>',
             unsafe_allow_html=True,
         )
+        section_guide(
+            "<strong>Full Attribution</strong> = visitor matched to GA4 sessions (multi-touch journey). "
+            "<strong>Partial</strong> = UTM data but no session match (single-touch). "
+            "<strong>Unknown</strong> = no digital signal, defaults to Direct. "
+            "<strong>Trackable %</strong> = Full + Partial as % of total."
+        )
         summary = [
             ("Trackable", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
             ("Avg. Days to Enquiry", days_str, "#f8f9fa", "#1a2a3a"),
@@ -117,54 +119,37 @@ def render(data, filters):
         )
         st.markdown("")
 
-    # --- Dual-Column Enrolment Funnel ---
+    # --- Enrolment Funnel ---
     crm_raw = data.get("crm_leads_raw", pd.DataFrame())
-    section_guide(
-        "<strong>CRM Total</strong> = all leads from D365 (what teams see in CRM). "
-        "<strong>Tracked</strong> = leads with Full or Partial attribution (what the dashboard can attribute). "
-        "The gap shows how many leads lack digital tracking."
-    )
+    has_crm_data = not stitch.empty and not crm_raw.empty
 
-    stage_map = {
-        "Enquiry": "Enquiries", "Application": "Applications",
-        "Offer": "Offers", "Enrolment": "Enrolments",
-    }
-    funnel_stages = [
-        ("Journeys", unique_journeys, unique_journeys),
-        ("Leads", total_leads, total_leads),
-        ("Enquiries", total_enquiries, total_enquiries),
-        ("Applications", total_applications, total_applications),
-        ("Offers", total_offers, total_offers),
-        ("Enrolments", total_enrolments, total_enrolments),
-    ]
-
-    if not stitch.empty and not crm_raw.empty:
+    if has_crm_data:
         if "school" in filters and filters.get("schools"):
             crm_raw = crm_raw[crm_raw["school"].isin(filters["schools"])]
         crm_total = len(crm_raw)
-        tracked = len(full_attr) + len(partial_attr) if not stitch.empty else 0
 
-        colors = ["#E3EDF7", "#C3D8ED", "#8CB4DB", "#5A91C4", "#3472A8", "#1A5276"]
-        fgs = ["#1a2a3a", "#1a2a3a", "#1e3a50", "#ffffff", "#ffffff", "#ffffff"]
+        section_guide(
+            "<strong>Leads</strong> shows CRM total ({crm:,}) vs digitally tracked ({trk:,}). "
+            "The gap ({gap:,} leads) reflects visitors without digital tracking. "
+            "Other funnel stages show attributed totals only.".format(
+                crm=crm_total, trk=tracked_count, gap=crm_total - tracked_count
+            )
+        )
 
+        funnel = [
+            ("Journeys", f"{unique_journeys:,}", "#E3EDF7", "#1a2a3a", None),
+            ("Leads", f"{tracked_count:,}", "#C3D8ED", "#1a2a3a", f"CRM: {crm_total:,}"),
+            ("Enquiries", f"{total_enquiries:,.0f}", "#8CB4DB", "#1e3a50", None),
+            ("Applications", f"{total_applications:,.0f}", "#5A91C4", "#ffffff", None),
+            ("Offers", f"{total_offers:,.0f}", "#3472A8", "#ffffff", None),
+            ("Enrolments", f"{total_enrolments:,.0f}", "#1A5276", "#ffffff", None),
+        ]
         cards = ""
-        for i, (lbl, crm_val, trk_val) in enumerate([
-            ("Journeys", unique_journeys, unique_journeys),
-            ("Leads", crm_total, tracked),
-            ("Enquiries", f"{total_enquiries:,.0f}", f"{total_enquiries:,.0f}"),
-            ("Applications", f"{total_applications:,.0f}", f"{total_applications:,.0f}"),
-            ("Offers", f"{total_offers:,.0f}", f"{total_offers:,.0f}"),
-            ("Enrolments", f"{total_enrolments:,.0f}", f"{total_enrolments:,.0f}"),
-        ]):
-            crm_fmt = f"{crm_val:,}" if isinstance(crm_val, (int, float)) else crm_val
-            trk_fmt = f"{trk_val:,}" if isinstance(trk_val, (int, float)) else trk_val
+        for lbl, val, bg, fg, subtitle in funnel:
+            sub_html = f'<div style="font-size:11px;opacity:0.7;margin-top:2px">{subtitle}</div>' if subtitle else ""
             cards += (
-                f'<div class="kpi-card" style="background:{colors[i]};color:{fgs[i]}">'
-                f'<div class="kpi-lbl">{lbl}</div>'
-                f'<div style="display:flex;justify-content:space-between;align-items:baseline">'
-                f'<div><div style="font-size:11px;opacity:0.7">CRM</div><div class="kpi-val">{crm_fmt}</div></div>'
-                f'<div style="text-align:right"><div style="font-size:11px;opacity:0.7">Tracked</div><div class="kpi-val">{trk_fmt}</div></div>'
-                f'</div></div>'
+                f'<div class="kpi-card" style="background:{bg};color:{fg}">'
+                f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div>{sub_html}</div>'
             )
         st.markdown(
             f'<div class="kpi-sect">Enrolment Funnel</div>'

@@ -83,8 +83,14 @@ def load_data_from_bq():
     search_terms = _query(client, "v_search_terms")
     landing_pages = _query(client, "v_landing_pages")
 
-    stitch_audit = _query(client, "v_stitch_audit")
-    crm_leads_raw = _query(client, "v_crm_leads_raw")
+    try:
+        stitch_audit = _query(client, "v_stitch_audit")
+    except Exception:
+        stitch_audit = pd.DataFrame()
+    try:
+        crm_leads_raw = _query(client, "v_crm_leads_raw")
+    except Exception:
+        crm_leads_raw = pd.DataFrame()
 
     ad_lookups_raw = _query(client, "v_ad_lookups")
     ad_lookups = {}
@@ -127,5 +133,5 @@ def load_data_from_bq():
         "stitch_audit": stitch_audit,
         "crm_leads_raw": crm_leads_raw,
         "bq_run_ts": run_ts,
-        "csv_sourced": ["campaign_name_map", "meta_ad lookup"],
+        "csv_sourced": ["weekly_goals", "campaign_name_map", "meta_ad lookup"],
     }
