@@ -205,7 +205,7 @@ def render(data, filters):
         )
 
         costs = [
-            ("Spend", fmt(total_spend, c), ""),
+            ("Paid Ad Spend", fmt(total_spend, c), ""),
             ("CPL", fmt(cpl, c) if total_leads > 0 else "N/A",
              "Cost Per Lead — total ad spend divided by number of leads"),
             ("CPEn", fmt(cpen, c) if total_enquiries > 0 else "N/A",
