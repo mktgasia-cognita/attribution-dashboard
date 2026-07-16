@@ -15,23 +15,8 @@ def section_guide(text):
 
 
 def info_icon(tip):
-    return f' <span class="kpi-info" title="{tip}">&#8505;</span>'
-
-
-INFO_ICON_CSS = """
-.kpi-info {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.10);
-    font-size: 10px;
-    cursor: help;
-    margin-left: 4px;
-    vertical-align: middle;
-    font-style: normal;
-    transition: background 0.15s;
-}
-.kpi-info:hover { background: rgba(0,0,0,0.20); }
-"""
+    safe_tip = tip.replace('"', '&quot;')
+    return (
+        f' <span class="kpi-info" data-tip="{safe_tip}">&#8505;'
+        f'<span class="kpi-tooltip">{safe_tip}</span></span>'
+    )

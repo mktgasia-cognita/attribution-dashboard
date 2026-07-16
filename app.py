@@ -106,15 +106,23 @@ st.markdown("""
         width: 16px; height: 16px; border-radius: 50%;
         background: rgba(0,0,0,0.10); font-size: 10px; cursor: help;
         margin-left: 4px; vertical-align: middle; font-style: normal;
-        transition: background 0.15s;
+        transition: background 0.15s; position: relative;
     }
     .kpi-info:hover { background: rgba(0,0,0,0.20); }
-    /* Section interpretation guide */
-    .section-guide {
-        background: #f0f7ff; border-left: 3px solid #3498db;
-        padding: 10px 14px; margin: 0 0 16px; border-radius: 0 6px 6px 0;
-        font-size: 13px; color: #2c3e50; line-height: 1.6;
+    .kpi-tooltip {
+        display: none; position: absolute; bottom: 130%; left: 50%;
+        transform: translateX(-50%); background: #2c3e50; color: #fff;
+        padding: 6px 10px; border-radius: 4px; font-size: 12px;
+        white-space: nowrap; max-width: 280px; white-space: normal;
+        z-index: 999; line-height: 1.4; font-weight: 400;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
+    .kpi-tooltip::after {
+        content: ""; position: absolute; top: 100%; left: 50%;
+        transform: translateX(-50%); border: 5px solid transparent;
+        border-top-color: #2c3e50;
+    }
+    .kpi-info:hover .kpi-tooltip { display: block; }
     /* Push Plotly modebar above chart content */
     .js-plotly-plot .modebar-container {
         top: -40px !important;
