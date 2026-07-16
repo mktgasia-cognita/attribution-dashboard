@@ -60,7 +60,8 @@ def render(data, filters):
         if "school" in stitch.columns and filters.get("schools"):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
         if "created_on" in stitch.columns:
-            stitch["created_on"] = pd.to_datetime(stitch["created_on"], errors="coerce")
+            stitch = stitch.copy()
+            stitch["created_on"] = pd.to_datetime(stitch["created_on"], errors="coerce", utc=True).dt.tz_localize(None)
             stitch = stitch[stitch["created_on"].notna()]
             stitch = stitch[
                 (stitch["created_on"] >= pd.Timestamp(filters["start_date"]))
@@ -80,8 +81,8 @@ def render(data, filters):
         avg_days = None
         if "created_on" in stitch.columns and "first_touch_date" in stitch.columns:
             dated = full_attr.copy()
-            dated["created_on"] = pd.to_datetime(dated["created_on"], errors="coerce")
-            dated["first_touch_date"] = pd.to_datetime(dated["first_touch_date"], errors="coerce")
+            dated["created_on"] = pd.to_datetime(dated["created_on"], errors="coerce", utc=True).dt.tz_localize(None)
+            dated["first_touch_date"] = pd.to_datetime(dated["first_touch_date"], errors="coerce", utc=True).dt.tz_localize(None)
             valid = dated.dropna(subset=["created_on", "first_touch_date"])
             if not valid.empty:
                 avg_days = (valid["created_on"] - valid["first_touch_date"]).dt.days.mean()
@@ -134,7 +135,8 @@ def render(data, filters):
         if "school" in crm_raw.columns and filters.get("schools"):
             crm_raw = crm_raw[crm_raw["school"].isin(filters["schools"])]
         if "created_on" in crm_raw.columns:
-            crm_raw["created_on"] = pd.to_datetime(crm_raw["created_on"], errors="coerce")
+            crm_raw = crm_raw.copy()
+            crm_raw["created_on"] = pd.to_datetime(crm_raw["created_on"], errors="coerce", utc=True).dt.tz_localize(None)
             crm_raw = crm_raw[crm_raw["created_on"].notna()]
             crm_raw = crm_raw[
                 (crm_raw["created_on"] >= pd.Timestamp(filters["start_date"]))
