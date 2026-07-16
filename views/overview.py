@@ -68,15 +68,22 @@ def render(data, filters):
                 & (stitch["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
             ]
         stitch_total = len(stitch)
+        has_entry_type = "entry_type" in stitch.columns
         full_attr = stitch[stitch["bq_sessions_found"] > 0]
         partial_attr = stitch[
             (stitch["bq_sessions_found"] == 0)
             & (~stitch["first_touch_source"].isin(["(direct)", "offline", ""]))
             & (stitch["first_touch_source"].notna())
         ]
-        unknown_attr = stitch_total - len(full_attr) - len(partial_attr)
+        if has_entry_type:
+            offline_attr = stitch[stitch["entry_type"] == "offline"]
+            unknown_attr = stitch_total - len(full_attr) - len(partial_attr) - len(offline_attr)
+        else:
+            offline_attr = pd.DataFrame()
+            unknown_attr = stitch_total - len(full_attr) - len(partial_attr)
         tracked_count = len(full_attr) + len(partial_attr)
-        trackable_pct = (tracked_count / stitch_total * 100) if stitch_total > 0 else 0
+        webform_base = stitch_total - len(offline_attr) if has_entry_type else stitch_total
+        trackable_pct = (tracked_count / webform_base * 100) if webform_base > 0 else 0
 
         avg_days = None
         if "created_on" in stitch.columns and "first_touch_date" in stitch.columns:
@@ -92,8 +99,12 @@ def render(data, filters):
             ("Total Leads", f"{stitch_total:,}", "#f8f9fa", "#1a2a3a"),
             ("Full Attribution", f"{len(full_attr):,}", "#d4edda", "#155724"),
             ("Partial Attribution", f"{len(partial_attr):,}", "#fff3cd", "#856404"),
-            ("Unknown Attribution", f"{unknown_attr:,}", "#f8d7da", "#721c24"),
         ]
+        if has_entry_type:
+            completeness.append(("Offline", f"{len(offline_attr):,}", "#e8ecf0", "#4a5568"))
+        completeness.append(("Unknown", f"{unknown_attr:,}", "#f8d7da", "#721c24"))
+
+        grid_cols = len(completeness)
         cards = ""
         for lbl, val, bg, fg in completeness:
             cards += (
@@ -102,15 +113,25 @@ def render(data, filters):
             )
         st.markdown(
             f'<div class="kpi-sect">How Complete Is Our Data?</div>'
-            f'<div class="kpi-grid kpi-grid-4">{cards}</div>',
+            f'<div class="kpi-grid" style="grid-template-columns: repeat({grid_cols}, 1fr);">{cards}</div>',
             unsafe_allow_html=True,
         )
-        section_guide(
-            "<strong>Full Attribution</strong> = visitor matched to GA4 sessions (multi-touch journey). "
-            "<strong>Partial</strong> = UTM data but no session match (single-touch). "
-            "<strong>Unknown</strong> = no digital signal, defaults to Direct. "
-            "<strong>Trackable %</strong> = Full + Partial as % of total."
-        )
+        if has_entry_type:
+            section_guide(
+                "<strong>Full Attribution</strong> = matched to GA4 sessions (multi-touch journey). "
+                "<strong>Partial</strong> = UTM data but no session match (single-touch). "
+                "<strong>Offline</strong> = phone, email, portal, or direct application leads — "
+                "these never pass through a webform and cannot be digitally attributed. "
+                "<strong>Unknown</strong> = webform leads with no digital signal (consent-blocked or cookie failure). "
+                "<strong>Trackable %</strong> = Full + Partial as % of webform leads only."
+            )
+        else:
+            section_guide(
+                "<strong>Full Attribution</strong> = visitor matched to GA4 sessions (multi-touch journey). "
+                "<strong>Partial</strong> = UTM data but no session match (single-touch). "
+                "<strong>Unknown</strong> = no digital signal, defaults to Direct. "
+                "<strong>Trackable %</strong> = Full + Partial as % of total."
+            )
         summary = [
             ("Trackable Journeys", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
             ("Avg. Days to Lead", days_str, "#f8f9fa", "#1a2a3a"),
@@ -127,21 +148,98 @@ def render(data, filters):
         )
         st.markdown("")
 
-    # --- Enrolment Funnel ---
+    # --- Lead Source Mix (CRM entry channels) ---
     crm_raw = data.get("crm_leads_raw", pd.DataFrame())
-    has_crm_data = not stitch.empty and not crm_raw.empty
+    if not crm_raw.empty:
+        crm_filtered = crm_raw.copy()
+        if "school" in crm_filtered.columns and filters.get("schools"):
+            crm_filtered = crm_filtered[crm_filtered["school"].isin(filters["schools"])]
+        if "created_on" in crm_filtered.columns:
+            crm_filtered["created_on"] = pd.to_datetime(crm_filtered["created_on"], errors="coerce", utc=True).dt.tz_localize(None)
+            crm_filtered = crm_filtered[crm_filtered["created_on"].notna()]
+            crm_filtered = crm_filtered[
+                (crm_filtered["created_on"] >= pd.Timestamp(filters["start_date"]))
+                & (crm_filtered["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
+            ]
+    else:
+        crm_filtered = pd.DataFrame()
+
+    if not crm_filtered.empty and "channel" in crm_filtered.columns:
+        channel_counts = crm_filtered["channel"].fillna("Unknown").value_counts()
+        crm_total_mix = len(crm_filtered)
+
+        ENTRY_CHANNEL_COLORS = {
+            "Webform": "#3472A8",
+            "Email": "#95a5a6",
+            "Direct Application": "#b0b8c1",
+            "Phone": "#c5cdd5",
+            "Walk-in": "#cdd4db",
+            "Website": "#d5dbe1",
+            "Referral": "#dce2e8",
+            "Parent Application Portal": "#e2e7ec",
+            "Sibling": "#e8ecf0",
+            "Unknown": "#ecf0f3",
+        }
+        ordered = ["Webform", "Email", "Direct Application", "Phone",
+                    "Walk-in", "Website", "Referral", "Parent Application Portal",
+                    "Sibling"]
+        labels_ordered = [ch for ch in ordered if ch in channel_counts.index]
+        extras = [ch for ch in channel_counts.index if ch not in ordered]
+        labels_ordered.extend(extras)
+
+        fig_mix = go.Figure()
+        for ch in labels_ordered:
+            count = channel_counts[ch]
+            pct = count / crm_total_mix * 100
+            fig_mix.add_trace(go.Bar(
+                y=[""],
+                x=[count],
+                name=ch,
+                orientation="h",
+                marker_color=ENTRY_CHANNEL_COLORS.get(ch, "#bdc3c7"),
+                hovertemplate=f"<b>{ch}</b><br>{count:,} leads ({pct:.1f}%)<extra></extra>",
+                text=f"{ch} ({pct:.0f}%)" if pct >= 5 else "",
+                textposition="inside",
+                textfont=dict(color="white" if ch == "Webform" else "#1a2a3a", size=12),
+            ))
+
+        webform_count = channel_counts.get("Webform", 0)
+        webform_pct = webform_count / crm_total_mix * 100 if crm_total_mix > 0 else 0
+
+        fig_mix.update_layout(
+            barmode="stack",
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="top", y=-0.3, xanchor="left", x=0,
+                        font=dict(size=11)),
+            height=120,
+            margin=dict(l=0, r=0, t=0, b=40),
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+        )
+
+        st.markdown(
+            f'<div class="kpi-sect">Lead Source Mix ({crm_total_mix:,} leads)</div>',
+            unsafe_allow_html=True,
+        )
+        section_guide(
+            "How leads enter the CRM. <strong>Webform</strong> leads ({wf:,}, {pct:.0f}%) "
+            "come through website forms and are the only leads that can be digitally "
+            "attributed via the stitch pipeline and Markov model. "
+            "All other channels (email, phone, portal, direct application) are recorded "
+            "in the CRM but cannot be matched to website sessions.".format(
+                wf=webform_count, pct=webform_pct
+            )
+        )
+        st.plotly_chart(fig_mix, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("")
+
+    # --- Enrolment Funnel ---
+    has_crm_data = not stitch.empty and not crm_filtered.empty
 
     if has_crm_data:
-        if "school" in crm_raw.columns and filters.get("schools"):
-            crm_raw = crm_raw[crm_raw["school"].isin(filters["schools"])]
-        if "created_on" in crm_raw.columns:
-            crm_raw = crm_raw.copy()
-            crm_raw["created_on"] = pd.to_datetime(crm_raw["created_on"], errors="coerce", utc=True).dt.tz_localize(None)
-            crm_raw = crm_raw[crm_raw["created_on"].notna()]
-            crm_raw = crm_raw[
-                (crm_raw["created_on"] >= pd.Timestamp(filters["start_date"]))
-                & (crm_raw["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
-            ]
+        crm_raw = crm_filtered
         crm_total = len(crm_raw)
 
         section_guide(
