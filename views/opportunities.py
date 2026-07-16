@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from utils.currency import fmt
+from utils.help import section_guide
 
 
 def render(data, filters):
@@ -17,11 +18,21 @@ def render(data, filters):
 
     campaign_perf = _build_campaign_performance(attr, spend_df)
 
+    section_guide(
+        "This page flags campaigns worth reviewing based on cost and conversion patterns. "
+        "<strong>CPA</strong> (Cost Per Acquisition) = how much you spend to get one lead. "
+        "<strong>Share of Impressions</strong> = what percentage of your total ad visibility this channel represents. "
+        "Cost per lead is one signal, not the full picture — lead quality and campaign objectives matter too."
+    )
+
     col_left, col_right = st.columns(2)
 
     with col_left:
         st.subheader("INCREASE - Scale These Campaigns")
-        st.caption("Below-median CPA at below-median spend")
+        section_guide(
+            "Campaigns with a lower cost per lead relative to others, at relatively low spend. "
+            "These may have room to scale — but check lead quality before increasing budget."
+        )
         has_conv = campaign_perf[campaign_perf["conversions"] > 0].sort_values("cpa")
         if len(has_conv) >= 4:
             increase = has_conv[
@@ -38,7 +49,12 @@ def render(data, filters):
 
     with col_right:
         st.subheader("DECREASE - Review These Campaigns")
-        st.caption("High spend, low conversion, poor CPA")
+        section_guide(
+            "Campaigns spending heavily but <strong>not converting efficiently</strong>. "
+            "Review targeting, creative, or consider reducing budget. "
+            "Campaigns with zero conversions despite spend are listed first — these "
+            "need immediate attention."
+        )
         # Channels burning spend with zero attributed conversions are the
         # strongest decrease candidates - list them first (CPA shows N/A).
         zero_conv = campaign_perf[
@@ -65,7 +81,12 @@ def render(data, filters):
 
     with col_kw:
         st.subheader("Keywords")
-        st.caption("Full period - not affected by the date filter")
+        section_guide(
+            "Search terms driving the most Google Ads conversions. "
+            "<strong>CTR</strong> (Click-Through Rate) = % of people who saw the ad and clicked. "
+            "<strong>CPA</strong> = cost to get one conversion from this keyword. "
+            "Full period data — not affected by the date filter."
+        )
         kw_agg = search_df.groupby("keyword").agg(
             conversions=("conversions", "sum"),
             cost=("cost", "sum"),
@@ -88,7 +109,12 @@ def render(data, filters):
 
     with col_content:
         st.subheader("Top Content")
-        st.caption("Full period - not affected by the date filter")
+        section_guide(
+            "Landing pages that generate the most conversions from paid traffic. "
+            "<strong>Conv Rate</strong> = % of visitors to that page who submitted a form. "
+            "Higher conversion rates mean the page content matches what the visitor expected from the ad. "
+            "Full period data — not affected by the date filter."
+        )
         landing_df = landing_df.copy()
         landing_df["landing_page"] = landing_df["landing_page"].fillna("(not set)")
         lp = landing_df.sort_values("conversions", ascending=False).head(15).copy()
@@ -103,7 +129,12 @@ def render(data, filters):
 
     st.divider()
     st.subheader("Keyword x Content Combinations")
-    st.caption("Full period - not affected by the date filter")
+    section_guide(
+        "Which keyword + landing page pairings are converting. "
+        "This shows the connection between what someone searched for and where they landed. "
+        "High-converting combinations confirm good ad-to-page alignment. "
+        "Full period data — not affected by the date filter."
+    )
     combos = search_df.groupby(["keyword", "campaign"]).agg(
         cost=("cost", "sum"),
         conversions=("conversions", "sum"),

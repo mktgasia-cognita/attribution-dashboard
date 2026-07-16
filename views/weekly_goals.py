@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from utils.currency import fmt
+from utils.help import section_guide
 
 
 def render(data, filters):
@@ -15,6 +16,15 @@ def render(data, filters):
     if goals.empty:
         st.warning("No weekly goals data for selected filters.")
         return
+
+    section_guide(
+        "Weekly performance against targets. Traffic light colours: "
+        "<strong style='color:#155724'>Green</strong> = on track (90%+ of lead target, "
+        "spend within 85-115%, CPA at or below target). "
+        "<strong style='color:#856404'>Amber</strong> = at risk (70-90% of target). "
+        "<strong style='color:#721c24'>Red</strong> = behind (below 70%). "
+        "CPA is flagged when actual cost exceeds the target threshold."
+    )
 
     for school in sorted(goals["school"].unique()):
         st.subheader(school)

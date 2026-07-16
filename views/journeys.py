@@ -2,6 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 from utils.channel_grouping import CHANNEL_COLORS
+from utils.help import section_guide
 
 
 def render(data, filters):
@@ -19,9 +20,20 @@ def render(data, filters):
     _render_ai_referral_callout(journeys)
 
     st.subheader("Channel Grouping Journey")
-    st.caption("How marketing channels connect across the customer journey. Each column is a touchpoint position. Wider flows = more journeys through that path. Colours match the source channel.")
+    section_guide(
+        "<strong>How to read this flow chart:</strong> Each column is a touchpoint position "
+        "(First Touch → Last Touch). Wider flows = more journeys through that path. "
+        "Follow a colour from left to right to see how prospects move between channels. "
+        "For example, a wide flow from Paid Social (first touch) to Organic Search (last touch) "
+        "means many prospects first clicked a social ad, then later returned via Google to convert."
+    )
     _render_sankey(journeys, "channel_grouping", CHANNEL_COLORS, threshold_pct=0.01)
-    st.caption("All channels with first-touch, last-touch, and total touchpoint counts:")
+    section_guide(
+        "<strong>First Touch</strong> = the channel that introduced the prospect to your website. "
+        "<strong>Last Touch</strong> = the final interaction before they converted. "
+        "A channel strong in First Touch is good at <em>awareness</em>; strong in Last Touch means it's good at <em>closing</em>. "
+        "<strong>Unique Journeys</strong> = how many distinct prospects interacted with that channel."
+    )
     _render_detail_table(journeys, "channel_grouping", "Channel")
 
     st.divider()
@@ -39,7 +51,11 @@ def render(data, filters):
 
     source_colors = _generate_source_colors(source_journeys["source"].unique())
     _render_sankey(source_journeys, "source", source_colors, threshold_pct=0.01)
-    st.caption("All sources with attribution position breakdown:")
+    section_guide(
+        "Same breakdown at the individual source level. Use the channel filter above to isolate "
+        "specific source types — for example, filter to Paid Social to see which Meta campaigns "
+        "are driving first touches vs closing conversions."
+    )
     _render_detail_table(source_journeys, "source", "Source")
 
 

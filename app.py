@@ -100,6 +100,21 @@ st.markdown("""
         font-family: Arial, Helvetica, sans-serif !important;
         font-size: 13px !important;
     }
+    /* Info icon on KPI cards */
+    .kpi-info {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: rgba(0,0,0,0.10); font-size: 10px; cursor: help;
+        margin-left: 4px; vertical-align: middle; font-style: normal;
+        transition: background 0.15s;
+    }
+    .kpi-info:hover { background: rgba(0,0,0,0.20); }
+    /* Section interpretation guide */
+    .section-guide {
+        background: #f0f7ff; border-left: 3px solid #3498db;
+        padding: 10px 14px; margin: 0 0 16px; border-radius: 0 6px 6px 0;
+        font-size: 13px; color: #2c3e50; line-height: 1.6;
+    }
     /* Push Plotly modebar above chart content */
     .js-plotly-plot .modebar-container {
         top: -40px !important;

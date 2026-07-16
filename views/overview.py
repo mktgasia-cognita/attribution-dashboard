@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from utils.channel_grouping import CHANNEL_COLORS
 from utils.currency import fmt
+from utils.help import section_guide, info_icon
 
 COUNTRY_SHORT_NAMES = {
     "Myanmar, Republic of the Union of": "Myanmar",
@@ -52,25 +53,144 @@ def render(data, filters):
     }
     </style>""", unsafe_allow_html=True)
 
-    funnel = [
-        ("Journeys", f"{unique_journeys:,}", "#E3EDF7", "#1a2a3a"),
-        ("Leads", f"{total_leads:,.0f}", "#C3D8ED", "#1a2a3a"),
-        ("Enquiries", f"{total_enquiries:,.0f}", "#8CB4DB", "#1e3a50"),
-        ("Applications", f"{total_applications:,.0f}", "#5A91C4", "#ffffff"),
-        ("Offers", f"{total_offers:,.0f}", "#3472A8", "#ffffff"),
-        ("Enrolments", f"{total_enrolments:,.0f}", "#1A5276", "#ffffff"),
-    ]
-    cards = ""
-    for lbl, val, bg, fg in funnel:
-        cards += (
-            f'<div class="kpi-card" style="background:{bg};color:{fg}">'
-            f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div></div>'
+    # --- Data Completeness Section ---
+    stitch = data.get("stitch_audit", pd.DataFrame())
+    if not stitch.empty:
+        if "school" in filters and filters.get("schools"):
+            stitch = stitch[stitch["school"].isin(filters["schools"])]
+        stitch_total = len(stitch)
+        full_attr = stitch[stitch["bq_sessions_found"] > 0]
+        partial_attr = stitch[
+            (stitch["bq_sessions_found"] == 0)
+            & (~stitch["first_touch_source"].isin(["(direct)", "offline", ""]))
+            & (stitch["first_touch_source"].notna())
+        ]
+        unknown_attr = stitch_total - len(full_attr) - len(partial_attr)
+        trackable_pct = ((len(full_attr) + len(partial_attr)) / stitch_total * 100) if stitch_total > 0 else 0
+
+        avg_days = None
+        if "created_on" in stitch.columns and "first_touch_date" in stitch.columns:
+            dated = full_attr.copy()
+            dated["created_on"] = pd.to_datetime(dated["created_on"], errors="coerce")
+            dated["first_touch_date"] = pd.to_datetime(dated["first_touch_date"], errors="coerce")
+            valid = dated.dropna(subset=["created_on", "first_touch_date"])
+            if not valid.empty:
+                avg_days = (valid["created_on"] - valid["first_touch_date"]).dt.days.mean()
+
+        section_guide(
+            "<strong>Full Attribution</strong> = visitor matched to GA4 sessions (multi-touch journey). "
+            "<strong>Partial</strong> = UTM data but no session match (single-touch). "
+            "<strong>Unknown</strong> = no digital signal, defaults to Direct. "
+            "<strong>Trackable %</strong> = Full + Partial as % of total."
         )
-    st.markdown(
-        f'<div class="kpi-sect">Funnel</div>'
-        f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
-        unsafe_allow_html=True,
+        days_str = f"{avg_days:.0f}" if avg_days is not None else "N/A"
+        completeness = [
+            ("Total Leads", f"{stitch_total:,}", "#f8f9fa", "#1a2a3a"),
+            ("Full Attribution", f"{len(full_attr):,}", "#d4edda", "#155724"),
+            ("Partial Attribution", f"{len(partial_attr):,}", "#fff3cd", "#856404"),
+            ("Unknown Attribution", f"{unknown_attr:,}", "#f8d7da", "#721c24"),
+        ]
+        cards = ""
+        for lbl, val, bg, fg in completeness:
+            cards += (
+                f'<div class="kpi-card" style="background:{bg};color:{fg}">'
+                f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div></div>'
+            )
+        st.markdown(
+            f'<div class="kpi-sect">How Complete Is Our Data?</div>'
+            f'<div class="kpi-grid kpi-grid-4">{cards}</div>',
+            unsafe_allow_html=True,
+        )
+        summary = [
+            ("Trackable", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
+            ("Avg. Days to Enquiry", days_str, "#f8f9fa", "#1a2a3a"),
+        ]
+        cards = ""
+        for lbl, val, bg, fg in summary:
+            cards += (
+                f'<div class="kpi-card" style="background:{bg};color:{fg}">'
+                f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div></div>'
+            )
+        st.markdown(
+            f'<div class="kpi-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 400px;">{cards}</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown("")
+
+    # --- Dual-Column Enrolment Funnel ---
+    crm_raw = data.get("crm_leads_raw", pd.DataFrame())
+    section_guide(
+        "<strong>CRM Total</strong> = all leads from D365 (what teams see in CRM). "
+        "<strong>Tracked</strong> = leads with Full or Partial attribution (what the dashboard can attribute). "
+        "The gap shows how many leads lack digital tracking."
     )
+
+    stage_map = {
+        "Enquiry": "Enquiries", "Application": "Applications",
+        "Offer": "Offers", "Enrolment": "Enrolments",
+    }
+    funnel_stages = [
+        ("Journeys", unique_journeys, unique_journeys),
+        ("Leads", total_leads, total_leads),
+        ("Enquiries", total_enquiries, total_enquiries),
+        ("Applications", total_applications, total_applications),
+        ("Offers", total_offers, total_offers),
+        ("Enrolments", total_enrolments, total_enrolments),
+    ]
+
+    if not stitch.empty and not crm_raw.empty:
+        if "school" in filters and filters.get("schools"):
+            crm_raw = crm_raw[crm_raw["school"].isin(filters["schools"])]
+        crm_total = len(crm_raw)
+        tracked = len(full_attr) + len(partial_attr) if not stitch.empty else 0
+
+        colors = ["#E3EDF7", "#C3D8ED", "#8CB4DB", "#5A91C4", "#3472A8", "#1A5276"]
+        fgs = ["#1a2a3a", "#1a2a3a", "#1e3a50", "#ffffff", "#ffffff", "#ffffff"]
+
+        cards = ""
+        for i, (lbl, crm_val, trk_val) in enumerate([
+            ("Journeys", unique_journeys, unique_journeys),
+            ("Leads", crm_total, tracked),
+            ("Enquiries", f"{total_enquiries:,.0f}", f"{total_enquiries:,.0f}"),
+            ("Applications", f"{total_applications:,.0f}", f"{total_applications:,.0f}"),
+            ("Offers", f"{total_offers:,.0f}", f"{total_offers:,.0f}"),
+            ("Enrolments", f"{total_enrolments:,.0f}", f"{total_enrolments:,.0f}"),
+        ]):
+            crm_fmt = f"{crm_val:,}" if isinstance(crm_val, (int, float)) else crm_val
+            trk_fmt = f"{trk_val:,}" if isinstance(trk_val, (int, float)) else trk_val
+            cards += (
+                f'<div class="kpi-card" style="background:{colors[i]};color:{fgs[i]}">'
+                f'<div class="kpi-lbl">{lbl}</div>'
+                f'<div style="display:flex;justify-content:space-between;align-items:baseline">'
+                f'<div><div style="font-size:11px;opacity:0.7">CRM</div><div class="kpi-val">{crm_fmt}</div></div>'
+                f'<div style="text-align:right"><div style="font-size:11px;opacity:0.7">Tracked</div><div class="kpi-val">{trk_fmt}</div></div>'
+                f'</div></div>'
+            )
+        st.markdown(
+            f'<div class="kpi-sect">Enrolment Funnel</div>'
+            f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        funnel = [
+            ("Journeys", f"{unique_journeys:,}", "#E3EDF7", "#1a2a3a"),
+            ("Leads", f"{total_leads:,.0f}", "#C3D8ED", "#1a2a3a"),
+            ("Enquiries", f"{total_enquiries:,.0f}", "#8CB4DB", "#1e3a50"),
+            ("Applications", f"{total_applications:,.0f}", "#5A91C4", "#ffffff"),
+            ("Offers", f"{total_offers:,.0f}", "#3472A8", "#ffffff"),
+            ("Enrolments", f"{total_enrolments:,.0f}", "#1A5276", "#ffffff"),
+        ]
+        cards = ""
+        for lbl, val, bg, fg in funnel:
+            cards += (
+                f'<div class="kpi-card" style="background:{bg};color:{fg}">'
+                f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div></div>'
+            )
+        st.markdown(
+            f'<div class="kpi-sect">Enrolment Funnel</div>'
+            f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
+            unsafe_allow_html=True,
+        )
 
     # Spend uses the ad-platform taxonomy, so it cannot follow the channel
     # filter. Showing filtered leads against unfiltered spend produces wrong
@@ -91,21 +211,29 @@ def render(data, filters):
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
         mer = (total_leads / total_spend * 1000) if total_spend > 0 else 0
         c = filters["currency"]
+
+        section_guide(
+            "How ad spend relates to lead volume. Hover the ℹ icon on each card for its formula. "
+            "These metrics show cost efficiency, but a low CPL does not always mean better results — "
+            "it depends on lead quality and campaign goals. "
+            "All metrics use combined spend across Google Ads and Meta Ads."
+        )
+
         costs = [
             ("Spend", fmt(total_spend, c), ""),
             ("CPL", fmt(cpl, c) if total_leads > 0 else "N/A",
-             "Cost Per Lead (total spend / leads)"),
+             "Cost Per Lead — total ad spend divided by number of leads"),
             ("CPEn", fmt(cpen, c) if total_enquiries > 0 else "N/A",
-             "Cost Per Enquiry (total spend / enquiries)"),
+             "Cost Per Enquiry — total ad spend divided by enquiries (further down the funnel than leads)"),
             (f"Leads/{c} 1k", f"{mer:.1f}" if total_spend > 0 else "N/A",
-             f"Leads per {c} 1,000 spend"),
+             f"How many leads generated per {c} 1,000 spent"),
         ]
         cards = ""
         for lbl, val, tip in costs:
-            title_attr = f' title="{tip}"' if tip else ""
+            icon = info_icon(tip) if tip else ""
             cards += (
-                f'<div class="kpi-card" style="background:#f8f9fa;color:#1a2a3a"{title_attr}>'
-                f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div></div>'
+                f'<div class="kpi-card" style="background:#f8f9fa;color:#1a2a3a">'
+                f'<div class="kpi-lbl">{lbl}{icon}</div><div class="kpi-val">{val}</div></div>'
             )
         st.markdown(
             f'<div class="kpi-sect">Cost Efficiency</div>'
@@ -119,6 +247,12 @@ def render(data, filters):
 
     with col_left:
         st.subheader("Attribution by Channel")
+        section_guide(
+            "Which marketing channels are driving leads. Credit is split across "
+            "channels using <strong>Markov attribution</strong> — a model that measures "
+            "each channel's actual contribution to conversions, rather than giving "
+            "all credit to the last click."
+        )
         lead_attr = attr[(attr["stage"] == "D1 Lead") & (~attr["channel_grouping"].isin(["Offline", "(Other)"]))]
         channel_attr = lead_attr.groupby("channel_grouping")["attribution_weight"].sum().reset_index()
         channel_attr = channel_attr.sort_values("attribution_weight", ascending=False)
@@ -160,6 +294,11 @@ def render(data, filters):
 
     with col_right:
         st.subheader("Leads Over Time")
+        section_guide(
+            "Weekly trend of new prospects at each pipeline stage. "
+            "Look for spikes (campaign launches, events) and dips (holidays, budget pauses). "
+            "All lines rising together suggests healthy pipeline flow."
+        )
         stages_of_interest = ["D1 Lead", "D2 Enquiry", "D3 Application", "D4 Offer", "D5 Enrolment"]
         leads_time = attr[attr["stage"].isin(stages_of_interest)].copy()
         leads_time["week"] = leads_time["date"].dt.to_period("W").apply(lambda x: x.start_time)
@@ -183,6 +322,11 @@ def render(data, filters):
         st.plotly_chart(fig_line, width="stretch")
 
     st.subheader("Top Sources of Enquiries")
+    section_guide(
+        "Campaigns ranked by their contribution to enquiries (not just leads). "
+        "Decimal values (e.g. 2.50) mean credit is shared — this campaign contributed "
+        "to 2-3 enquiries but shares credit with other channels those prospects also interacted with."
+    )
     d2_attr = attr[(attr["stage"] == "D2 Enquiry") & (~attr["channel_grouping"].isin(["Offline", "(Other)"]))]
     top_sources = d2_attr.groupby(["channel_grouping", "campaign"]).agg(
         attributed_conversions=("attribution_weight", "sum"),
@@ -195,6 +339,10 @@ def render(data, filters):
     st.divider()
 
     st.subheader("Country Distribution")
+    section_guide(
+        "Based on the country detected in the visitor's first website session. "
+        "Helps identify which markets are generating the most interest."
+    )
     if not journeys.empty:
         first_touches = journeys[journeys["touchpoint"] == 1]
         country_counts = first_touches["country"].value_counts().reset_index()

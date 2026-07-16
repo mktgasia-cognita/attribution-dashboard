@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from utils.help import section_guide
 
 
 DIMENSION_CONFIG = {
@@ -39,6 +40,13 @@ def render(data, filters):
     if attr.empty:
         st.warning("No data for selected filters.")
         return
+
+    section_guide(
+        "Detailed attribution breakdown by campaign. Each cell shows the <strong>Markov-attributed credit</strong> "
+        "for that source at each pipeline stage. A value of 0.50 means the campaign receives half the credit "
+        "for that conversion — the rest goes to other channels the prospect also interacted with. "
+        "Darker shading = higher values. Sort by Total to find the most influential campaigns."
+    )
 
     sub_tab = st.radio(
         "View",

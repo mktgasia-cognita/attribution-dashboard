@@ -83,6 +83,9 @@ def load_data_from_bq():
     search_terms = _query(client, "v_search_terms")
     landing_pages = _query(client, "v_landing_pages")
 
+    stitch_audit = _query(client, "v_stitch_audit")
+    crm_leads_raw = _query(client, "v_crm_leads_raw")
+
     ad_lookups_raw = _query(client, "v_ad_lookups")
     ad_lookups = {}
     if not ad_lookups_raw.empty:
@@ -121,8 +124,8 @@ def load_data_from_bq():
         "weekly_goals": weekly_goals,
         "ad_lookups": ad_lookups,
         "d365_enrichment": d365_enrichment,
-        # Freshness metadata for the UI: BQ run being served, plus which
-        # datasets still come from repo CSVs in BQ mode.
+        "stitch_audit": stitch_audit,
+        "crm_leads_raw": crm_leads_raw,
         "bq_run_ts": run_ts,
-        "csv_sourced": ["weekly_goals", "campaign_name_map", "meta_ad lookup"],
+        "csv_sourced": ["campaign_name_map", "meta_ad lookup"],
     }

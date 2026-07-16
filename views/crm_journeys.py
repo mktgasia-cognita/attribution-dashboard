@@ -1,6 +1,7 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
+from utils.help import section_guide
 
 
 GRADE_SORT_ORDER = [
@@ -34,6 +35,12 @@ def render(data, filters):
 
     with col_left:
         st.subheader("Closed Reasons")
+        section_guide(
+            "Why prospects dropped out of the pipeline. "
+            "This only shows leads marked as 'Lost' in the CRM. "
+            "Common reasons help identify whether drop-offs are due to pricing, "
+            "timing, location, or other factors."
+        )
         # closed_reason is not in the BQ pipeline output (D365 exports carry
         # no close reason) - guard for the column before using it.
         if "closed_reason" in journeys.columns:
@@ -56,6 +63,12 @@ def render(data, filters):
 
     with col_right:
         st.subheader("Country x Stage Matrix")
+        section_guide(
+            "Cross-tabulates prospect nationality against their furthest pipeline stage. "
+            "<strong>Act</strong> = still active in pipeline. <strong>Lost</strong> = closed without enrolling. "
+            "<strong>Won</strong> = enrolled. High Lost counts at early stages may indicate "
+            "targeting the wrong audience in that market."
+        )
         first_touches = journeys[journeys["touchpoint"] == 1].copy()
         first_touches["stage_status"] = first_touches["max_stage"] + " - " + first_touches["status"]
 
@@ -99,6 +112,12 @@ def render(data, filters):
 
     st.divider()
     st.subheader("Journey Detail")
+    section_guide(
+        "Each row is one prospect's marketing journey. <strong>Source Path</strong> shows every "
+        "marketing channel they touched, in order (e.g. google > facebook > google means they "
+        "first found you via Google, then saw a Facebook ad, then returned via Google to convert). "
+        "Use this to understand the typical path to enrolment."
+    )
     first_touches_detail = journeys[journeys["touchpoint"] == 1].copy()
     journey_detail = journeys.groupby("journey_id").agg(
         source_path=("source", lambda x: " > ".join(x)),
@@ -255,6 +274,13 @@ def _render_d365_enrichment(journeys, attr):
     st.plotly_chart(fig, width="stretch")
 
     st.markdown("**Grade x Channel**")
+    section_guide(
+        "Markov-attributed credit broken down by year level and marketing channel. "
+        "Each number shows how much credit that channel receives for leads applying to that grade. "
+        "For example, 0.90 in Nursery / OrganicSearch means Organic Search contributed 0.90 units "
+        "of attributed credit toward Nursery-grade leads. Use this to see which channels are "
+        "reaching families at specific year levels."
+    )
     enriched_attr = attr.dropna(subset=["applied_grade"])
     if selected_grades:
         enriched_attr = enriched_attr[enriched_attr["applied_grade"].isin(selected_grades)]
