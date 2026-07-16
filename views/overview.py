@@ -356,12 +356,10 @@ def render(data, filters):
         lead_attr = attr[(attr["stage"] == "D1 Lead") & (~attr["channel_grouping"].isin(["Offline", "(Other)"]))]
         channel_attr = lead_attr.groupby("channel_grouping")["attribution_weight"].sum().reset_index()
         channel_attr = channel_attr.sort_values("attribution_weight", ascending=False)
-        # Centre count and percentages must share the same base as the
-        # visible slices - Offline/(Other) are excluded above.
         visible_leads = channel_attr["attribution_weight"].sum()
         excluded_leads = total_leads - visible_leads
         if excluded_leads > 0.5:
-            st.caption(f"Digital channels only - excludes Offline/(Other) ({excluded_leads:,.0f} of {total_leads:,.0f} leads)")
+            st.caption(f"Webform leads only - excludes Offline ({excluded_leads:,.0f} of {total_leads:,.0f} leads)")
         colors = [CHANNEL_COLORS.get(ch, "#bdc3c7") for ch in channel_attr["channel_grouping"]]
         short_labels = {
             "BrandedPaidSearch": "Branded",

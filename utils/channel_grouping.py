@@ -1,6 +1,6 @@
 """
 Canonical channel grouping logic for attribution pipeline and dashboard.
-Single source of truth - keep in sync with ../../channel_grouping.py
+Single source of truth - keep in sync with attribution-dashboard/utils/channel_grouping.py
 """
 
 import re
@@ -24,6 +24,8 @@ def classify_channel(source, medium, campaign, ad_product_group=""):
         return "CompetitorPaidSearch"
     if m == "offline":
         return "Offline"
+    if s == "(unknown)" and m == "(unknown)":
+        return "Unknown"
     if s == "(direct)" and m in ("(not set)", "(none)"):
         return "Direct"
     if m == "gmb":
@@ -65,6 +67,7 @@ CHANNEL_COLORS = {
     "CompetitorPaidSearch": "#8e44ad",
     "PMaxPaidSearch": "#2980b9",
     "Offline": "#7f8c8d",
+    "Unknown": "#d5dbdb",
     "Local": "#27ae60",
     "DemandGen": "#c0392b",
     "(Other)": "#bdc3c7",
