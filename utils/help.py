@@ -8,6 +8,8 @@ GUIDE_STYLE = (
 
 
 def section_guide(text):
+    if not st.session_state.get("show_guides", True):
+        return
     st.markdown(
         f'<div style="{GUIDE_STYLE}">{text}</div>',
         unsafe_allow_html=True,

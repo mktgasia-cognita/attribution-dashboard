@@ -70,6 +70,9 @@ def render_sidebar(data, role=None):
                 f"{school} data available from {school_start_dates[school].strftime('%d/%m/%Y')}"
             )
 
+    st.sidebar.divider()
+    st.sidebar.checkbox("Show section guides", value=True, key="show_guides")
+
     return {
         "schools": selected_schools,
         "start_date": start_date,

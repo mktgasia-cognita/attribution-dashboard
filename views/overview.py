@@ -57,8 +57,14 @@ def render(data, filters):
     stitch = data.get("stitch_audit", pd.DataFrame())
     tracked_count = 0
     if not stitch.empty:
-        if "school" in filters and filters.get("schools"):
+        if "school" in stitch.columns and filters.get("schools"):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
+        if "created_on" in stitch.columns:
+            stitch["created_on"] = pd.to_datetime(stitch["created_on"], errors="coerce")
+            stitch = stitch[
+                (stitch["created_on"] >= pd.Timestamp(filters["start_date"]))
+                & (stitch["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
+            ]
         stitch_total = len(stitch)
         full_attr = stitch[stitch["bq_sessions_found"] > 0]
         partial_attr = stitch[
@@ -124,8 +130,14 @@ def render(data, filters):
     has_crm_data = not stitch.empty and not crm_raw.empty
 
     if has_crm_data:
-        if "school" in filters and filters.get("schools"):
+        if "school" in crm_raw.columns and filters.get("schools"):
             crm_raw = crm_raw[crm_raw["school"].isin(filters["schools"])]
+        if "created_on" in crm_raw.columns:
+            crm_raw["created_on"] = pd.to_datetime(crm_raw["created_on"], errors="coerce")
+            crm_raw = crm_raw[
+                (crm_raw["created_on"] >= pd.Timestamp(filters["start_date"]))
+                & (crm_raw["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
+            ]
         crm_total = len(crm_raw)
 
         section_guide(
