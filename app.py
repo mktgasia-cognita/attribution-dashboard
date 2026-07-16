@@ -112,8 +112,8 @@ st.markdown("""
     .kpi-tooltip {
         display: none; position: absolute; bottom: 130%; left: 50%;
         transform: translateX(-50%); background: #2c3e50; color: #fff;
-        padding: 6px 10px; border-radius: 4px; font-size: 12px;
-        white-space: nowrap; max-width: 280px; white-space: normal;
+        padding: 6px 12px; border-radius: 4px; font-size: 12px;
+        width: max-content; max-width: 420px;
         z-index: 999; line-height: 1.4; font-weight: 400;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
