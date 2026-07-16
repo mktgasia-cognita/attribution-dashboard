@@ -104,7 +104,7 @@ def render(data, filters):
             "<strong>Trackable %</strong> = Full + Partial as % of total."
         )
         summary = [
-            ("Trackable", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
+            ("Trackable Journeys", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
             ("Avg. Days to Lead", days_str, "#f8f9fa", "#1a2a3a"),
         ]
         cards = ""
