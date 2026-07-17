@@ -204,17 +204,22 @@ def render(data, filters):
     stitch = data.get("stitch_audit", pd.DataFrame())
     tracked_count = 0
     webform_base = 0
+    # DEBUG — remove after verifying fix on Streamlit Cloud
+    st.caption(f"DEBUG stitch loaded: {len(stitch)} rows, cols: {list(stitch.columns)[:5]}")
     if not stitch.empty:
         if "school" in stitch.columns and filters.get("schools"):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
         if "created_on" in stitch.columns:
             stitch = stitch.copy()
-            stitch["created_on"] = pd.to_datetime(stitch["created_on"], errors="coerce", utc=True).dt.tz_localize(None)
+            stitch["created_on"] = pd.to_datetime(stitch["created_on"], errors="coerce", utc=True).dt.tz_convert(None)
+            nat_count = stitch["created_on"].isna().sum()
             stitch = stitch[stitch["created_on"].notna()]
+            st.caption(f"DEBUG after date parse: {len(stitch)} rows, {nat_count} NaT dropped")
             stitch = stitch[
                 (stitch["created_on"] >= pd.Timestamp(filters["start_date"]))
                 & (stitch["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
             ]
+            st.caption(f"DEBUG after date filter ({filters['start_date']} to {filters['end_date']}): {len(stitch)} rows")
         stitch_total = len(stitch)
         has_entry_type = "entry_type" in stitch.columns
         if has_entry_type:
@@ -237,8 +242,8 @@ def render(data, filters):
         avg_days = None
         if "created_on" in stitch.columns and "first_touch_date" in stitch.columns:
             dated = full_attr.copy()
-            dated["created_on"] = pd.to_datetime(dated["created_on"], errors="coerce", utc=True).dt.tz_localize(None)
-            dated["first_touch_date"] = pd.to_datetime(dated["first_touch_date"], errors="coerce", utc=True).dt.tz_localize(None)
+            dated["created_on"] = pd.to_datetime(dated["created_on"], errors="coerce", utc=True).dt.tz_convert(None)
+            dated["first_touch_date"] = pd.to_datetime(dated["first_touch_date"], errors="coerce", utc=True).dt.tz_convert(None)
             valid = dated.dropna(subset=["created_on", "first_touch_date"])
             if not valid.empty:
                 days_series = (valid["created_on"] - valid["first_touch_date"]).dt.days.clip(lower=0)
@@ -314,7 +319,7 @@ def render(data, filters):
         if "school" in crm_filtered.columns and filters.get("schools"):
             crm_filtered = crm_filtered[crm_filtered["school"].isin(filters["schools"])]
         if "created_on" in crm_filtered.columns:
-            crm_filtered["created_on"] = pd.to_datetime(crm_filtered["created_on"], errors="coerce", utc=True).dt.tz_localize(None)
+            crm_filtered["created_on"] = pd.to_datetime(crm_filtered["created_on"], errors="coerce", utc=True).dt.tz_convert(None)
             crm_filtered = crm_filtered[crm_filtered["created_on"].notna()]
             crm_filtered = crm_filtered[
                 (crm_filtered["created_on"] >= pd.Timestamp(filters["start_date"]))
