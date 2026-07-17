@@ -39,15 +39,36 @@ def _channel_stage_table(attr):
         rows.append({"Channel": ch, "Leads": round(leads, 1), "Enquiries": round(enqs, 1),
                       "Enquiry Rate": eq_rate, "Enrolments": round(enrols, 1)})
 
-    df = pd.DataFrame(rows).sort_values("Leads", ascending=False)
-    total_leads = df["Leads"].sum()
-    total_enqs = df["Enquiries"].sum()
-    total_enrols = df["Enrolments"].sum()
+    rows.sort(key=lambda r: r["Leads"], reverse=True)
+    total_leads = sum(r["Leads"] for r in rows)
+    total_enqs = sum(r["Enquiries"] for r in rows)
+    total_enrols = sum(r["Enrolments"] for r in rows)
     total_rate = f"{total_enqs / total_leads * 100:.0f}%" if total_leads > 0 else "—"
-    totals = {"Channel": "Total", "Leads": total_leads, "Enquiries": total_enqs,
-              "Enquiry Rate": total_rate, "Enrolments": total_enrols}
-    df = pd.concat([df, pd.DataFrame([totals])], ignore_index=True)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+
+    hdr = ('<tr><th style="text-align:left">Channel</th>'
+           '<th style="text-align:right">Leads</th>'
+           '<th style="text-align:right">Enquiries</th>'
+           '<th style="text-align:center">Enquiry Rate</th>'
+           '<th style="text-align:right">Enrolments</th></tr>')
+    body = ""
+    for r in rows:
+        body += (f'<tr><td style="text-align:left">{r["Channel"]}</td>'
+                 f'<td style="text-align:right">{r["Leads"]}</td>'
+                 f'<td style="text-align:right">{r["Enquiries"]}</td>'
+                 f'<td style="text-align:center">{r["Enquiry Rate"]}</td>'
+                 f'<td style="text-align:right">{r["Enrolments"]}</td></tr>')
+    foot = (f'<tr style="font-weight:600;border-top:2px solid #ccc">'
+            f'<td style="text-align:left">Total</td>'
+            f'<td style="text-align:right">{total_leads}</td>'
+            f'<td style="text-align:right">{total_enqs}</td>'
+            f'<td style="text-align:center">{total_rate}</td>'
+            f'<td style="text-align:right">{total_enrols}</td></tr>')
+    st.markdown(
+        f'<table style="width:100%;border-collapse:collapse;font-size:14px">'
+        f'<thead style="border-bottom:2px solid #ccc">{hdr}</thead>'
+        f'<tbody>{body}</tbody><tfoot>{foot}</tfoot></table>',
+        unsafe_allow_html=True,
+    )
 
 
 def render(data, filters):
