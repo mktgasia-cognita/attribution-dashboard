@@ -20,7 +20,7 @@ def _get_client():
         sa["private_key"] = sa["private_key"].replace("\\n", "\n")
     from google.oauth2 import service_account
     creds = service_account.Credentials.from_service_account_info(sa)
-    return bigquery.Client(project=PROJECT, credentials=creds)
+    return bigquery.Client(project=PROJECT, credentials=creds, location="asia-southeast1")
 
 
 def _latest_complete_run(client):
@@ -85,12 +85,10 @@ def load_data_from_bq():
 
     stitch_err = None
     try:
-        ref = f"`{PROJECT}.{DATASET}.v_stitch_audit`"
-        stitch_audit = client.query(f"SELECT * FROM {ref}").to_dataframe()
-        stitch_err = f"loaded {len(stitch_audit)} rows via to_dataframe"
+        stitch_audit = _query(client, "v_stitch_audit")
+        stitch_err = f"v11-query:{len(stitch_audit)}rows"
     except Exception as e:
-        stitch_err = str(e)
-        print(f"stitch_audit load failed: {e}")
+        stitch_err = f"v11-err:{type(e).__name__}:{e}"
         stitch_audit = pd.DataFrame()
     crm_err = None
     try:

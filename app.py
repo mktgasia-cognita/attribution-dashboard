@@ -154,7 +154,7 @@ def _data_source():
         return "csv"
 
 
-DATA_VERSION = "10"
+DATA_VERSION = "11"
 
 
 @st.cache_data(ttl=3600 if _data_source() == "bigquery" else None)

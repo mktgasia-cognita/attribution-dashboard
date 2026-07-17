@@ -204,9 +204,18 @@ def render(data, filters):
     stitch = data.get("stitch_audit", pd.DataFrame())
     tracked_count = 0
     webform_base = 0
-    # DEBUG — remove after verifying fix on Streamlit Cloud
+    # DEBUG — uncached diagnostic query (bypass st.cache_data)
     stitch_err = data.get("_stitch_err")
-    st.caption(f"DEBUG stitch loaded: {len(stitch)} rows, cols: {list(stitch.columns)[:5]}, err: {stitch_err}")
+    try:
+        from data.bigquery import _get_client, PROJECT, DATASET
+        _diag_client = _get_client()
+        _diag_sql = f"SELECT COUNT(*) as cnt FROM `{PROJECT}.{DATASET}.v_stitch_audit`"
+        _diag_rows = list(_diag_client.query(_diag_sql).result())
+        _diag_cnt = _diag_rows[0].cnt if _diag_rows else "no rows"
+        _diag_msg = f"DIAG uncached count={_diag_cnt}, cached={len(stitch)}, err={stitch_err}"
+    except Exception as _diag_e:
+        _diag_msg = f"DIAG uncached ERROR: {type(_diag_e).__name__}: {_diag_e}"
+    st.caption(_diag_msg)
     if not stitch.empty:
         if "school" in stitch.columns and filters.get("schools"):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
