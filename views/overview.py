@@ -78,7 +78,7 @@ def render(data, filters):
         full_attr = webform_stitch[webform_stitch["bq_sessions_found"] > 0]
         partial_attr = webform_stitch[
             (webform_stitch["bq_sessions_found"] == 0)
-            & (~webform_stitch["first_touch_source"].isin(["(direct)", "offline", ""]))
+            & (~webform_stitch["first_touch_source"].isin(["(direct)", "(unknown)", "offline", ""]))
             & (webform_stitch["first_touch_source"].notna())
         ]
         unknown_attr = len(webform_stitch) - len(full_attr) - len(partial_attr)
@@ -93,7 +93,8 @@ def render(data, filters):
             dated["first_touch_date"] = pd.to_datetime(dated["first_touch_date"], errors="coerce", utc=True).dt.tz_localize(None)
             valid = dated.dropna(subset=["created_on", "first_touch_date"])
             if not valid.empty:
-                avg_days = (valid["created_on"] - valid["first_touch_date"]).dt.days.mean()
+                days_series = (valid["created_on"] - valid["first_touch_date"]).dt.days.clip(lower=0)
+                avg_days = days_series.mean()
 
         days_str = f"{avg_days:.0f}" if avg_days is not None else "N/A"
         completeness = [
@@ -171,15 +172,15 @@ def render(data, filters):
 
         ENTRY_CHANNEL_COLORS = {
             "Webform": "#3472A8",
-            "Email": "#95a5a6",
-            "Direct Application": "#b0b8c1",
-            "Phone": "#c5cdd5",
-            "Walk-in": "#cdd4db",
-            "Website": "#d5dbe1",
-            "Referral": "#dce2e8",
-            "Parent Application Portal": "#e2e7ec",
-            "Sibling": "#e8ecf0",
-            "Unknown": "#ecf0f3",
+            "Email": "#E8A87C",
+            "Direct Application": "#95B8D1",
+            "Phone": "#B5CA8D",
+            "Walk-in": "#D4A5A5",
+            "Website": "#9CADCE",
+            "Referral": "#C9B1D0",
+            "Parent Application Portal": "#A8D5BA",
+            "Sibling": "#D4C5A9",
+            "Unknown": "#C4C4C4",
         }
         ordered = ["Webform", "Email", "Direct Application", "Phone",
                     "Walk-in", "Website", "Referral", "Parent Application Portal",
@@ -244,9 +245,10 @@ def render(data, filters):
         crm_total = len(crm_raw)
 
         section_guide(
-            "<strong>Leads</strong> shows CRM total ({crm:,}) vs digitally tracked ({trk:,}). "
-            "The gap ({gap:,} leads) reflects visitors without digital tracking. "
-            "Other funnel stages show attributed totals only.".format(
+            "<strong>Leads</strong> shows digitally tracked ({trk:,}) vs CRM total ({crm:,}). "
+            "The gap ({gap:,} leads) includes offline entries and webform leads with no digital signal. "
+            "All stages show Markov-attributed totals — credit is split across channels, "
+            "so values are fractional.".format(
                 crm=crm_total, trk=tracked_count, gap=crm_total - tracked_count
             )
         )
@@ -267,7 +269,7 @@ def render(data, filters):
                 f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div>{sub_html}</div>'
             )
         st.markdown(
-            f'<div class="kpi-sect">Enrolment Funnel</div>'
+            f'<div class="kpi-sect">Enrolment Funnel (Markov-Attributed)</div>'
             f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
             unsafe_allow_html=True,
         )
@@ -287,7 +289,7 @@ def render(data, filters):
                 f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div></div>'
             )
         st.markdown(
-            f'<div class="kpi-sect">Enrolment Funnel</div>'
+            f'<div class="kpi-sect">Enrolment Funnel (Markov-Attributed)</div>'
             f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
             unsafe_allow_html=True,
         )
