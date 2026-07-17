@@ -148,11 +148,18 @@ def render(data, filters):
             f'<div class="kpi-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 400px;">{cards}</div>',
             unsafe_allow_html=True,
         )
+        st.caption(
+            "Avg. Days to Lead = days between first tracked website visit and form submission "
+            "(BQ-matched leads only). Cookie resets, browser switches, and private browsing mean "
+            "the true consideration period is likely longer."
+        )
         st.markdown("")
 
     # --- Lead Source Mix (CRM entry channels) ---
     crm_raw = data.get("crm_leads_raw", pd.DataFrame())
     if not crm_raw.empty:
+        if "d365_id" in crm_raw.columns:
+            crm_raw = crm_raw.drop_duplicates(subset=["d365_id"], keep="last")
         crm_filtered = crm_raw.copy()
         if "school" in crm_filtered.columns and filters.get("schools"):
             crm_filtered = crm_filtered[crm_filtered["school"].isin(filters["schools"])]
