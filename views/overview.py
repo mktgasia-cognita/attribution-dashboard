@@ -40,9 +40,9 @@ def _channel_stage_table(attr):
                       "Enquiry Rate": eq_rate, "Enrolments": round(enrols, 2)})
 
     rows.sort(key=lambda r: r["Leads"], reverse=True)
-    total_leads = sum(r["Leads"] for r in rows)
-    total_enqs = sum(r["Enquiries"] for r in rows)
-    total_enrols = sum(r["Enrolments"] for r in rows)
+    total_leads = round(sum(r["Leads"] for r in rows), 2)
+    total_enqs = round(sum(r["Enquiries"] for r in rows), 2)
+    total_enrols = round(sum(r["Enrolments"] for r in rows), 2)
     total_rate = f"{total_enqs / total_leads * 100:.0f}%" if total_leads > 0 else "—"
 
     hdr = ('<tr><th style="text-align:left">Channel</th>'
