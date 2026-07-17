@@ -16,23 +16,31 @@ COUNTRY_SHORT_NAMES = {
 }
 
 
-def _cr_pct(num, den):
-    return f"{num / den * 100:.0f}%" if den > 0 else "—"
-
-
-def _funnel_cr_row(leads, enquiries, applications, offers, enrolments):
-    pairs = [
-        ("Lead → Enq", enquiries, leads),
-        ("Enq → App", applications, enquiries),
-        ("App → Offer", offers, applications),
-        ("Offer → Enrol", enrolments, offers),
-        ("Lead → Enrol", enrolments, leads),
+def _channel_stage_table(attr):
+    stages = [
+        ("D1 Lead", "Leads"),
+        ("D2 Enquiry", "Enquiries"),
+        ("D5 Enrolment", "Enrolments"),
     ]
-    pills = "".join(
-        f'<div class="cr-pill">{lbl}<br>{_cr_pct(n, d)}</div>'
-        for lbl, n, d in pairs
+    exclude = {"Offline", "(Other)", "Unknown"}
+    channels = sorted(
+        attr[~attr["channel_grouping"].isin(exclude)]["channel_grouping"].dropna().unique()
     )
-    return f'<div class="cr-row">{pills}</div>'
+    if not channels:
+        return
+
+    rows = []
+    for ch in channels:
+        ch_data = attr[attr["channel_grouping"] == ch]
+        leads = ch_data[ch_data["stage"] == "D1 Lead"]["attribution_weight"].sum()
+        enqs = ch_data[ch_data["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
+        enrols = ch_data[ch_data["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
+        cr = f"{enqs / leads * 100:.0f}%" if leads > 0 else "—"
+        rows.append({"Channel": ch, "Leads": int(round(leads)), "Enquiries": int(round(enqs)),
+                      "Enrolments": int(round(enrols)), "CR Lead → Enq": cr})
+
+    df = pd.DataFrame(rows).sort_values("Leads", ascending=False)
+    st.dataframe(df, use_container_width=True, hide_index=True)
 
 
 def render(data, filters):
@@ -56,10 +64,6 @@ def render(data, filters):
     .kpi-grid { display: grid; gap: 12px; margin-bottom: 20px; }
     .kpi-grid-6 { grid-template-columns: repeat(6, 1fr); }
     .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
-    .kpi-grid-5 { grid-template-columns: repeat(5, 1fr); }
-    .cr-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
-              margin: -8px 0 20px; padding: 0 calc(100% / 12); }
-    .cr-pill { text-align: center; font-size: 12px; color: #5A91C4; font-weight: 600; }
     .kpi-sect { font-size: 14px; font-weight: 600; color: #31333F; margin: 0 0 8px; }
     .kpi-card { padding: 16px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06);
                 box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -67,11 +71,10 @@ def render(data, filters):
     .kpi-val { font-size: 24px; font-weight: 600; }
     @media (max-width: 768px) {
         .kpi-grid-6 { grid-template-columns: repeat(3, 1fr); }
-        .kpi-grid-4, .kpi-grid-5 { grid-template-columns: repeat(2, 1fr); }
-        .cr-row { grid-template-columns: repeat(3, 1fr); padding: 0; }
+        .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 480px) {
-        .kpi-grid-6, .kpi-grid-4, .kpi-grid-5 { grid-template-columns: repeat(2, 1fr); }
+        .kpi-grid-6, .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
         .kpi-val { font-size: 18px; }
         .kpi-lbl { font-size: 12px; }
     }
@@ -308,8 +311,6 @@ def render(data, filters):
             f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
             unsafe_allow_html=True,
         )
-        cr_pills = _funnel_cr_row(tracked_count, total_enquiries, total_applications, total_offers, total_enrolments)
-        st.markdown(cr_pills, unsafe_allow_html=True)
     else:
         funnel = [
             ("Journeys", f"{webform_base:,}", "#E3EDF7", "#1a2a3a"),
@@ -330,8 +331,8 @@ def render(data, filters):
             f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
             unsafe_allow_html=True,
         )
-        cr_pills = _funnel_cr_row(total_leads, total_enquiries, total_applications, total_offers, total_enrolments)
-        st.markdown(cr_pills, unsafe_allow_html=True)
+    # Channel attribution table
+    _channel_stage_table(attr)
 
     st.divider()
 
@@ -350,9 +351,12 @@ def render(data, filters):
         )
     elif not spend_df.empty:
         total_spend = spend_df["spend"].sum()
+        google_spend = spend_df[spend_df["platform"] == "google"]["spend"].sum() if "platform" in spend_df.columns else 0
+        meta_spend = spend_df[spend_df["platform"] == "meta"]["spend"].sum() if "platform" in spend_df.columns else 0
         cpl = total_spend / total_leads if total_leads > 0 else 0
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
-        cpenrol = total_spend / total_enrolments if total_enrolments > 0 else 0
+        cpenrol_google = google_spend / total_enrolments if total_enrolments > 0 and google_spend > 0 else 0
+        cpenrol_meta = meta_spend / total_enrolments if total_enrolments > 0 and meta_spend > 0 else 0
         mer = (total_leads / total_spend * 1000) if total_spend > 0 else 0
         c = filters["currency"]
 
@@ -360,7 +364,7 @@ def render(data, filters):
             "How ad spend relates to lead volume and enrolments. Hover the ℹ icon on each card for its formula. "
             "These metrics show cost efficiency, but lower costs do not always mean better results — "
             "it depends on lead quality and campaign goals. "
-            "All metrics use combined spend across Google Ads and Meta Ads."
+            "CPEnrol is split by platform: Google Ads (Paid Search) and Meta Ads (Paid Social)."
         )
 
         costs = [
@@ -369,8 +373,10 @@ def render(data, filters):
              "Cost Per Lead — total ad spend divided by number of leads"),
             ("CPEn", fmt(cpen, c) if total_enquiries > 0 else "N/A",
              "Cost Per Enquiry — total ad spend divided by enquiries (further down the funnel than leads)"),
-            ("CPEnrol", fmt(cpenrol, c) if total_enrolments > 0 else "N/A",
-             "Cost Per Enrolment — total ad spend divided by enrolments (the deepest funnel stage)"),
+            ("CPEnrol Google", fmt(cpenrol_google, c) if cpenrol_google > 0 else "N/A",
+             "Cost Per Enrolment from Google Ads — Google Ads spend divided by total enrolments"),
+            ("CPEnrol Meta", fmt(cpenrol_meta, c) if cpenrol_meta > 0 else "N/A",
+             "Cost Per Enrolment from Meta Ads — Meta Ads spend divided by total enrolments"),
             (f"Leads/{c} 1k", f"{mer:.1f}" if total_spend > 0 else "N/A",
              f"How many leads generated per {c} 1,000 spent"),
         ]
@@ -383,7 +389,7 @@ def render(data, filters):
             )
         st.markdown(
             f'<div class="kpi-sect">Cost Efficiency</div>'
-            f'<div class="kpi-grid kpi-grid-5">{cards}</div>',
+            f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
             unsafe_allow_html=True,
         )
 
