@@ -265,6 +265,7 @@ def render(data, filters):
                 hovertemplate=f"<b>{ch}</b><br>{count:,} leads ({pct:.1f}%)<extra></extra>",
                 text=f"{ch} ({pct:.0f}%)" if pct >= 5 else "",
                 textposition="inside",
+                insidetextanchor="start",
                 textfont=dict(color="white" if ch == "Webform" else "#1a2a3a", size=12),
             ))
 
