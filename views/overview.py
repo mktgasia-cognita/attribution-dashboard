@@ -310,16 +310,15 @@ def render(data, filters):
         st.markdown("")
 
     # --- Lead Source Mix (CRM entry channels) ---
-    # Scope to same lead population as Data Completeness: stitch_ids already
-    # filtered by school + date, so only intersect — no second date filter.
+    # Left-join stitch leads to crm_raw for the channel column so the total
+    # always matches the Data Completeness "Total Leads" card.
     crm_raw = data.get("crm_leads_raw", pd.DataFrame())
-    if not crm_raw.empty and not stitch.empty:
-        if "d365_id" in crm_raw.columns:
-            crm_raw = crm_raw.drop_duplicates(subset=["d365_id"], keep="last")
-            stitch_ids = set(stitch["d365_id"].dropna())
-            crm_filtered = crm_raw[crm_raw["d365_id"].isin(stitch_ids)].copy()
-        else:
-            crm_filtered = crm_raw.copy()
+    if not stitch.empty and "d365_id" in stitch.columns:
+        channel_lookup = pd.DataFrame()
+        if not crm_raw.empty and "d365_id" in crm_raw.columns and "channel" in crm_raw.columns:
+            channel_lookup = crm_raw.drop_duplicates(subset=["d365_id"], keep="last")[["d365_id", "channel"]]
+        crm_filtered = stitch[["d365_id"]].merge(channel_lookup, on="d365_id", how="left")
+        crm_filtered["channel"] = crm_filtered["channel"].fillna("Unknown")
     else:
         crm_filtered = pd.DataFrame()
 
