@@ -36,8 +36,8 @@ def _channel_stage_table(attr):
         enqs = ch_data[ch_data["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
         enrols = ch_data[ch_data["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
         eq_rate = f"{enqs / leads * 100:.0f}%" if leads > 0 else "—"
-        rows.append({"Channel": ch, "Leads": round(leads, 1), "Enquiries": round(enqs, 1),
-                      "Enquiry Rate": eq_rate, "Enrolments": round(enrols, 1)})
+        rows.append({"Channel": ch, "Leads": round(leads, 2), "Enquiries": round(enqs, 2),
+                      "Enquiry Rate": eq_rate, "Enrolments": round(enrols, 2)})
 
     rows.sort(key=lambda r: r["Leads"], reverse=True)
     total_leads = sum(r["Leads"] for r in rows)
