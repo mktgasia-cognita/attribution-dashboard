@@ -278,7 +278,7 @@ def render(data, filters):
                         font=dict(size=11)),
             height=120,
             margin=dict(l=0, r=0, t=0, b=40),
-            xaxis=dict(visible=False),
+            xaxis=dict(visible=False, range=[0, crm_total_mix]),
             yaxis=dict(visible=False),
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
