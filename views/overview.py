@@ -180,6 +180,7 @@ def render(data, filters):
 
     st.markdown("""<style>
     .kpi-grid { display: grid; gap: 12px; margin-bottom: 20px; }
+    .kpi-grid-5 { grid-template-columns: repeat(5, 1fr); }
     .kpi-grid-6 { grid-template-columns: repeat(6, 1fr); }
     .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
     .kpi-sect { font-size: 14px; font-weight: 600; color: #31333F; margin: 0 0 8px; }
@@ -188,11 +189,12 @@ def render(data, filters):
     .kpi-lbl { font-size: 13px; font-weight: 500; margin-bottom: 4px; opacity: 0.8; }
     .kpi-val { font-size: 24px; font-weight: 600; }
     @media (max-width: 768px) {
+        .kpi-grid-5 { grid-template-columns: repeat(3, 1fr); }
         .kpi-grid-6 { grid-template-columns: repeat(3, 1fr); }
         .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 480px) {
-        .kpi-grid-6, .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
+        .kpi-grid-5, .kpi-grid-6, .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
         .kpi-val { font-size: 18px; }
         .kpi-lbl { font-size: 12px; }
     }
@@ -410,8 +412,7 @@ def render(data, filters):
         )
 
         funnel = [
-            ("Journeys", f"{webform_base:,}", "#E3EDF7", "#1a2a3a", None),
-            ("Leads", f"{tracked_count:,}", "#C3D8ED", "#1a2a3a", f"CRM: {crm_total:,}"),
+            ("Leads", f"{total_leads:,.0f}", "#C3D8ED", "#1a2a3a", f"CRM: {crm_total:,}"),
             ("Enquiries", f"{total_enquiries:,.0f}", "#8CB4DB", "#1e3a50", None),
             ("Applications", f"{total_applications:,.0f}", "#5A91C4", "#ffffff", None),
             ("Offers", f"{total_offers:,.0f}", "#3472A8", "#ffffff", None),
@@ -425,12 +426,11 @@ def render(data, filters):
                 f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div>{sub_html}</div>'
             )
         st.markdown(
-            f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
+            f'<div class="kpi-grid kpi-grid-5">{cards}</div>',
             unsafe_allow_html=True,
         )
     else:
         funnel = [
-            ("Journeys", f"{webform_base:,}", "#E3EDF7", "#1a2a3a"),
             ("Leads", f"{total_leads:,.0f}", "#C3D8ED", "#1a2a3a"),
             ("Enquiries", f"{total_enquiries:,.0f}", "#8CB4DB", "#1e3a50"),
             ("Applications", f"{total_applications:,.0f}", "#5A91C4", "#ffffff"),
@@ -445,7 +445,7 @@ def render(data, filters):
             )
         st.markdown(
             f'<div class="kpi-sect">Enrolment Funnel (Markov-Attributed)</div>'
-            f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
+            f'<div class="kpi-grid kpi-grid-5">{cards}</div>',
             unsafe_allow_html=True,
         )
     # Channel attribution table
@@ -486,8 +486,8 @@ def render(data, filters):
         meta_spend = spend_df[spend_df["platform"] == "meta"]["spend"].sum() if "platform" in spend_df.columns else 0
         cpl = total_spend / total_leads if total_leads > 0 else 0
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
-        enrol_ps = attr[(attr["stage"] == "D5 Enrolment") & (attr["channel_grouping"] == "Paid Search")]["attribution_weight"].sum()
-        enrol_psoc = attr[(attr["stage"] == "D5 Enrolment") & (attr["channel_grouping"] == "Paid Social")]["attribution_weight"].sum()
+        enrol_ps = attr[(attr["stage"] == "D5 Enrolment") & (attr["channel_grouping"].isin(["GenericPaidSearch", "BrandedPaidSearch", "PMaxPaidSearch", "CompetitorPaidSearch"]))]["attribution_weight"].sum()
+        enrol_psoc = attr[(attr["stage"] == "D5 Enrolment") & (attr["channel_grouping"] == "PaidSocial")]["attribution_weight"].sum()
         cpenrol_google = google_spend / enrol_ps if enrol_ps > 0 and google_spend > 0 else 0
         cpenrol_meta = meta_spend / enrol_psoc if enrol_psoc > 0 and meta_spend > 0 else 0
         mer = (total_leads / total_spend * 1000) if total_spend > 0 else 0
@@ -507,9 +507,9 @@ def render(data, filters):
             ("CPEn", fmt(cpen, c) if total_enquiries > 0 else "N/A",
              "Cost Per Enquiry — total ad spend divided by enquiries (further down the funnel than leads)"),
             ("CPEnrol Google", fmt(cpenrol_google, c) if cpenrol_google > 0 else "N/A",
-             "Cost Per Enrolment — Google Ads spend divided by enrolments attributed to Paid Search"),
+             "Cost Per Enrolment — Google Ads spend divided by enrolments attributed to Paid Search channels"),
             ("CPEnrol Meta", fmt(cpenrol_meta, c) if cpenrol_meta > 0 else "N/A",
-             "Cost Per Enrolment — Meta Ads spend divided by enrolments attributed to Paid Social"),
+             "Cost Per Enrolment — Meta Ads spend divided by enrolments attributed to PaidSocial"),
             (f"Leads/{c} 1k", f"{mer:.1f}" if total_spend > 0 else "N/A",
              f"How many leads generated per {c} 1,000 spent"),
         ]
