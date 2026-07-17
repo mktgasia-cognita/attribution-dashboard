@@ -22,22 +22,26 @@ def _channel_stage_table(attr):
         ("D2 Enquiry", "Enquiries"),
         ("D5 Enrolment", "Enrolments"),
     ]
+    table_attr = attr[~attr["channel_grouping"].isin(["Offline"])]
     channels = sorted(
-        attr["channel_grouping"].dropna().unique()
+        table_attr["channel_grouping"].dropna().unique()
     )
     if not channels:
         return
 
     rows = []
     for ch in channels:
-        ch_data = attr[attr["channel_grouping"] == ch]
+        ch_data = table_attr[table_attr["channel_grouping"] == ch]
         leads = ch_data[ch_data["stage"] == "D1 Lead"]["attribution_weight"].sum()
         enqs = ch_data[ch_data["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
         enrols = ch_data[ch_data["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
-        rows.append({"Channel": ch, "Leads": int(round(leads)), "Enquiries": int(round(enqs)),
-                      "Enrolments": int(round(enrols))})
+        rows.append({"Channel": ch, "Leads": round(leads, 1), "Enquiries": round(enqs, 1),
+                      "Enrolments": round(enrols, 1)})
 
     df = pd.DataFrame(rows).sort_values("Leads", ascending=False)
+    totals = {"Channel": "Total", "Leads": df["Leads"].sum(), "Enquiries": df["Enquiries"].sum(),
+              "Enrolments": df["Enrolments"].sum()}
+    df = pd.concat([df, pd.DataFrame([totals])], ignore_index=True)
     st.dataframe(df, use_container_width=True, hide_index=True)
 
 
