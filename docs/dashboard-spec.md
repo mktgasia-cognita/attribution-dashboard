@@ -76,7 +76,12 @@ Phase 3: Write
 
 Phase 4: Ad Data
   Google Ads spend from BQ transfer tables (ads_CampaignBasicStats)
+    — already campaign-level, SUM GROUP BY campaign, date
   Meta Ads spend from BQ transfer tables (AdInsights)
+    — AdInsights stores rows at ad+region breakdown level, NOT campaign-level
+    — inner: MAX(Spend) GROUP BY CampaignId, CampaignName, DateStart (campaign total)
+    — outer: SUM GROUP BY campaign, date (same pattern as Google)
+    — same MAX aggregation applies to impressions and clicks
   Search terms from ads_SearchQueryStats + keyword resolution
   Ad lookups (ad group / ad set level performance)
   Spend validation: flag days over daily max threshold
@@ -349,7 +354,7 @@ Views are created by `create_all_views.py` (the canonical generator). It program
 
 ### Data Loading
 Two paths controlled by `DATA_SOURCE` env var or `data_source` secret:
-- **bigquery** (live): queries combined views in `cognita_attribution`, merges enrichment from `v_crm_leads`, cache TTL 1 hour
+- **bigquery** (live): queries combined views in `cognita_attribution`, merges enrichment from `v_crm_leads`. Cache key: `_bq_run_ts()` queries `MAX(pipeline_run_ts)` from `v_pipeline_latest` — when a new pipeline run completes, the next page load auto-refreshes data (no manual version bumps). Streamlit Cloud still needs a manual reboot for code pushes (not data pushes)
 - **csv** (fallback): reads from `data/school_data/` directory. Files: journeys_raw.csv, attributed.csv, spend.csv, search_terms.csv, landing_pages.csv, weekly_goals.csv, plus optional enrichment and ad lookup CSVs
 
 ### Filtering
@@ -397,13 +402,14 @@ Shows the full CRM picture — how many leads can/cannot be digitally attributed
 | Partial Attribution | `count where bq_sessions_found = 0 AND has non-trivial UTM AND entry_type = webform` |
 | Offline | `count where entry_type != webform` |
 | Unknown | `webform_count - full - partial` |
-| Trackable % | `(full + partial) / webform_count * 100` |
+| Trackable Leads | `count where bq_sessions_found > 0 AND entry_type = webform` — Full Attribution only (excludes Partial/UTM-only) |
+| Trackable % | `trackable_leads / webform_count * 100` |
 | Avg Days to Lead | `mean(created_on - first_touch_date)` for full-attribution leads, clipped >= 0 |
 
 ### 2. Lead Source Mix
-**Source:** crm_leads_raw (deduped by d365_id). **Filters:** school + date (manual). No channel filter.
+**Source:** stitch_audit left-joined to crm_leads_raw for `channel` column. **Filters:** school + date (manual). No channel filter.
 
-Stacked bar of CRM entry channels (Webform, Email, Phone, Portal, etc.). Explains gap between CRM total and attributed total.
+Population is scoped to stitch_audit (latest pipeline run), so total always equals the Data Completeness "Total Leads" card. Unmatched leads show as "Unknown" in the mix. Stacked bar of CRM entry channels (Webform, Email, Phone, Portal, etc.).
 
 ### 3. Enrolment Funnel (Markov-Attributed)
 **Source:** `attr = apply_filters(data["attributed"], filters)`. **Filters:** school + date + channel.
