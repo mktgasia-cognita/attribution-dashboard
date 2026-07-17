@@ -85,7 +85,9 @@ def load_data_from_bq():
 
     stitch_err = None
     try:
-        stitch_audit = _query(client, "v_stitch_audit")
+        ref = f"`{PROJECT}.{DATASET}.v_stitch_audit`"
+        stitch_audit = client.query(f"SELECT * FROM {ref}").to_dataframe()
+        stitch_err = f"loaded {len(stitch_audit)} rows via to_dataframe"
     except Exception as e:
         stitch_err = str(e)
         print(f"stitch_audit load failed: {e}")
