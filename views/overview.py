@@ -234,7 +234,7 @@ def render(data, filters):
             & (webform_stitch["first_touch_source"].notna())
         ]
         unknown_attr = len(webform_stitch) - len(full_attr) - len(partial_attr)
-        tracked_count = len(full_attr) + len(partial_attr)
+        tracked_count = len(full_attr)
         webform_base = len(webform_stitch)
         trackable_pct = (tracked_count / webform_base * 100) if webform_base > 0 else 0
 
@@ -277,14 +277,14 @@ def render(data, filters):
                 "<strong>Offline</strong> = phone, email, portal, or direct application leads — "
                 "these never pass through a webform and cannot be digitally attributed. "
                 "<strong>Unknown</strong> = webform leads with no digital signal (consent-blocked or cookie failure). "
-                "<strong>Trackable %</strong> = Full + Partial as % of webform leads only."
+                "<strong>Trackable %</strong> = Full Attribution as % of webform leads only."
             )
         else:
             section_guide(
                 "<strong>Full Attribution</strong> = visitor matched to GA4 sessions (multi-touch journey). "
                 "<strong>Partial</strong> = UTM data but no session match (single-touch). "
                 "<strong>Unknown</strong> = no digital signal, defaults to Direct. "
-                "<strong>Trackable %</strong> = Full + Partial as % of total."
+                "<strong>Trackable %</strong> = Full Attribution as % of total."
             )
         summary = [
             ("Trackable Leads", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
