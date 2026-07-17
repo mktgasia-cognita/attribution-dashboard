@@ -252,6 +252,10 @@ def render(data, filters):
         crm_raw = crm_filtered
         crm_total = len(crm_raw)
 
+        st.markdown(
+            f'<div class="kpi-sect">Enrolment Funnel (Markov-Attributed)</div>',
+            unsafe_allow_html=True,
+        )
         section_guide(
             "<strong>Leads</strong> shows digitally tracked ({trk:,}) vs CRM total ({crm:,}). "
             "The gap ({gap:,} leads) includes offline entries and webform leads with no digital signal. "
@@ -277,7 +281,6 @@ def render(data, filters):
                 f'<div class="kpi-lbl">{lbl}</div><div class="kpi-val">{val}</div>{sub_html}</div>'
             )
         st.markdown(
-            f'<div class="kpi-sect">Enrolment Funnel (Markov-Attributed)</div>'
             f'<div class="kpi-grid kpi-grid-6">{cards}</div>',
             unsafe_allow_html=True,
         )
