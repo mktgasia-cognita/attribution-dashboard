@@ -154,7 +154,7 @@ def _data_source():
         return "csv"
 
 
-DATA_VERSION = "11"
+DATA_VERSION = "12"
 
 
 @st.cache_data(ttl=3600 if _data_source() == "bigquery" else None)
@@ -181,7 +181,6 @@ PAGES = {
 page = st.sidebar.radio("Navigation", list(PAGES.keys()), label_visibility="collapsed")
 st.sidebar.divider()
 
-st.cache_data.clear()
 try:
     data = get_data(source=_data_source())
 except Exception as exc:

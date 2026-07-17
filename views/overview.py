@@ -204,32 +204,21 @@ def render(data, filters):
     stitch = data.get("stitch_audit", pd.DataFrame())
     tracked_count = 0
     webform_base = 0
-    # DEBUG — uncached diagnostic query (bypass st.cache_data)
-    stitch_err = data.get("_stitch_err")
-    try:
-        from data.bigquery import _get_client, PROJECT, DATASET
-        _diag_client = _get_client()
-        _diag_sql = f"SELECT COUNT(*) as cnt FROM `{PROJECT}.{DATASET}.v_stitch_audit`"
-        _diag_rows = list(_diag_client.query(_diag_sql).result())
-        _diag_cnt = _diag_rows[0].cnt if _diag_rows else "no rows"
-        _diag_msg = f"DIAG uncached count={_diag_cnt}, cached={len(stitch)}, err={stitch_err}"
-    except Exception as _diag_e:
-        _diag_msg = f"DIAG uncached ERROR: {type(_diag_e).__name__}: {_diag_e}"
-    st.caption(_diag_msg)
     if not stitch.empty:
         if "school" in stitch.columns and filters.get("schools"):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
         if "created_on" in stitch.columns:
             stitch = stitch.copy()
-            stitch["created_on"] = pd.to_datetime(stitch["created_on"], errors="coerce", utc=True).dt.tz_convert(None)
-            nat_count = stitch["created_on"].isna().sum()
+            stitch["created_on"] = pd.to_datetime(stitch["created_on"], errors="coerce", utc=True)
+            try:
+                stitch["created_on"] = stitch["created_on"].dt.tz_convert(None)
+            except TypeError:
+                pass
             stitch = stitch[stitch["created_on"].notna()]
-            st.caption(f"DEBUG after date parse: {len(stitch)} rows, {nat_count} NaT dropped")
             stitch = stitch[
                 (stitch["created_on"] >= pd.Timestamp(filters["start_date"]))
                 & (stitch["created_on"] < pd.Timestamp(filters["end_date"]) + pd.Timedelta(days=1))
             ]
-            st.caption(f"DEBUG after date filter ({filters['start_date']} to {filters['end_date']}): {len(stitch)} rows")
         stitch_total = len(stitch)
         has_entry_type = "entry_type" in stitch.columns
         if has_entry_type:
