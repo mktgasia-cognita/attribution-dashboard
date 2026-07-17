@@ -181,6 +181,7 @@ PAGES = {
 page = st.sidebar.radio("Navigation", list(PAGES.keys()), label_visibility="collapsed")
 st.sidebar.divider()
 
+st.cache_data.clear()
 try:
     data = get_data(source=_data_source())
 except Exception as exc:
