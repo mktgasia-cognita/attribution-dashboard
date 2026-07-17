@@ -287,7 +287,7 @@ def render(data, filters):
                 "<strong>Trackable %</strong> = Full + Partial as % of total."
             )
         summary = [
-            ("Trackable Journeys", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
+            ("Trackable Leads", f"{trackable_pct:.0f}%", "#f8f9fa", "#1a2a3a"),
             ("Avg. Days to Lead", days_str, "#f8f9fa", "#1a2a3a"),
         ]
         cards = ""
@@ -303,7 +303,7 @@ def render(data, filters):
         st.caption(
             "Avg. Days to Lead = days between first tracked website visit and form submission "
             "(first-touch to last-touch matched leads only). This metric is influenced by the "
-            "Trackable Journeys % — a lower match rate means fewer leads contribute to the average, "
+            "Trackable Leads % — a lower match rate means fewer leads contribute to the average, "
             "which may skew the result. Cookie resets, browser switches, and private browsing mean "
             "the true consideration period is likely longer."
         )
