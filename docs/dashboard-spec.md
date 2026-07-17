@@ -439,8 +439,8 @@ All cards are Markov-attributed. When CRM data available: Leads card also shows 
 | Paid Ad Spend | `sum(spend)` |
 | CPL | `total_spend / leads` |
 | CPEn | `total_spend / enquiries` |
-| CPEnrol Google | `google_spend / attr D5 Enrolment where channel in (GenericPaidSearch, BrandedPaidSearch, PMaxPaidSearch, CompetitorPaidSearch)` |
-| CPEnrol Meta | `meta_spend / attr D5 Enrolment where channel = PaidSocial` |
+| CPEnrol Google | `google_spend / attr D5 Enrolment where channel in (GenericPaidSearch, BrandedPaidSearch, PMaxPaidSearch, CompetitorPaidSearch)` — N/A when < 1 attributed enrolment |
+| CPEnrol Meta | `meta_spend / attr D5 Enrolment where channel = PaidSocial` — N/A when < 1 attributed enrolment |
 | Leads/1k | `leads / total_spend * 1000` |
 
 ### 6. Attribution by Channel (Donut)

@@ -488,8 +488,8 @@ def render(data, filters):
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
         enrol_ps = attr[(attr["stage"] == "D5 Enrolment") & (attr["channel_grouping"].isin(["GenericPaidSearch", "BrandedPaidSearch", "PMaxPaidSearch", "CompetitorPaidSearch"]))]["attribution_weight"].sum()
         enrol_psoc = attr[(attr["stage"] == "D5 Enrolment") & (attr["channel_grouping"] == "PaidSocial")]["attribution_weight"].sum()
-        cpenrol_google = google_spend / enrol_ps if enrol_ps > 0 and google_spend > 0 else 0
-        cpenrol_meta = meta_spend / enrol_psoc if enrol_psoc > 0 and meta_spend > 0 else 0
+        cpenrol_google = google_spend / enrol_ps if enrol_ps >= 1 and google_spend > 0 else 0
+        cpenrol_meta = meta_spend / enrol_psoc if enrol_psoc >= 1 and meta_spend > 0 else 0
         mer = (total_leads / total_spend * 1000) if total_spend > 0 else 0
         c = filters["currency"]
 
