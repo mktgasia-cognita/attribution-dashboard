@@ -102,39 +102,62 @@ def _survey_vs_attribution(data, attr, filters):
     )
 
     survey_counts = matched["heard_about"].fillna("Not Answered").value_counts()
+    survey_total = survey_counts.sum()
     matched_attr = attr[
         (attr["stage"] == "D1 Lead")
         & (attr["d365_id"].isin(stitched_ids))
         & (~attr["channel_grouping"].isin(["Offline", "Unknown"]))
     ]
     digital_counts = matched_attr.groupby("channel_grouping")["attribution_weight"].sum().sort_values(ascending=False)
+    digital_total = digital_counts.sum()
 
     col_survey, col_digital = st.columns(2)
     with col_survey:
-        st.markdown('<div class="kpi-sect">How Parents Say They Found Us</div>', unsafe_allow_html=True)
-        fig_s = go.Figure(go.Bar(
-            x=survey_counts.values, y=survey_counts.index, orientation="h",
-            marker_color="#3472A8",
-        ))
-        fig_s.update_layout(height=max(200, len(survey_counts) * 30), margin=dict(l=0, r=10, t=0, b=0),
-                            xaxis=dict(title="Leads"), yaxis=dict(autorange="reversed"),
-                            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig_s, use_container_width=True, config={"displayModeBar": False})
+        st.markdown(
+            f'<div class="kpi-sect">How Parents Say They Found Us ({survey_total:,} responses)</div>',
+            unsafe_allow_html=True,
+        )
+        s_rows = ""
+        for source, count in survey_counts.items():
+            pct = count / survey_total * 100
+            s_rows += (f'<tr><td style="text-align:left">{source}</td>'
+                       f'<td style="text-align:right">{pct:.0f}%</td>'
+                       f'<td style="text-align:right;color:#666">{count:,}</td></tr>')
+        st.markdown(
+            f'<table style="width:100%;border-collapse:collapse;font-size:14px">'
+            f'<thead style="border-bottom:2px solid #ccc"><tr>'
+            f'<th style="text-align:left">Source</th>'
+            f'<th style="text-align:right">%</th>'
+            f'<th style="text-align:right">Leads</th></tr></thead>'
+            f'<tbody>{s_rows}</tbody></table>',
+            unsafe_allow_html=True,
+        )
 
     with col_digital:
-        st.markdown('<div class="kpi-sect">Digital Attribution (Markov)</div>', unsafe_allow_html=True)
-        fig_d = go.Figure(go.Bar(
-            x=digital_counts.values, y=digital_counts.index, orientation="h",
-            marker_color="#5A91C4",
-        ))
-        fig_d.update_layout(height=max(200, len(digital_counts) * 30), margin=dict(l=0, r=10, t=0, b=0),
-                            xaxis=dict(title="Attributed Leads"), yaxis=dict(autorange="reversed"),
-                            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig_d, use_container_width=True, config={"displayModeBar": False})
+        st.markdown(
+            f'<div class="kpi-sect">Digital Attribution — Markov ({digital_total:.0f} attributed)</div>',
+            unsafe_allow_html=True,
+        )
+        d_rows = ""
+        for ch, weight in digital_counts.items():
+            pct = weight / digital_total * 100 if digital_total > 0 else 0
+            d_rows += (f'<tr><td style="text-align:left">{ch}</td>'
+                       f'<td style="text-align:right">{pct:.0f}%</td>'
+                       f'<td style="text-align:right;color:#666">{weight:.1f}</td></tr>')
+        st.markdown(
+            f'<table style="width:100%;border-collapse:collapse;font-size:14px">'
+            f'<thead style="border-bottom:2px solid #ccc"><tr>'
+            f'<th style="text-align:left">Channel</th>'
+            f'<th style="text-align:right">%</th>'
+            f'<th style="text-align:right">Attributed</th></tr></thead>'
+            f'<tbody>{d_rows}</tbody></table>',
+            unsafe_allow_html=True,
+        )
 
     st.caption(
-        f"Based on {len(matched):,} leads with both a survey response and a stitched digital journey. "
-        f"This is {len(matched) / len(crm_filtered) * 100:.0f}% of leads in the selected date range."
+        f"Based on {len(matched):,} leads with both a survey response and a stitched digital journey "
+        f"({len(matched) / len(crm_filtered) * 100:.0f}% of leads in selected date range). "
+        f"Survey responses reflect parent recall; digital attribution reflects tracked online behaviour."
     )
 
 
