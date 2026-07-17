@@ -366,7 +366,10 @@ def render(data, filters):
         "to attributed leads per channel. It indicates how well each channel's leads progress, "
         "but is not a true conversion rate since attribution is assigned independently at each stage. "
         "<strong>Enrolments</strong> may appear low or zero — the lead-to-enrolment cycle is typically "
-        "3+ months, so enrolment attribution requires data well beyond the selected date range."
+        "3+ months, so enrolment attribution requires data well beyond the selected date range. "
+        "<strong>Unknown</strong> = webform leads where no digital signal could be matched "
+        "(consent-blocked cookies, cleared browsing data, or tracking failure). "
+        "<strong>(Other)</strong> = traffic from sources that don't fit a standard channel grouping."
     )
     _channel_stage_table(attr)
 
