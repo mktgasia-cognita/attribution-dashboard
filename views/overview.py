@@ -121,12 +121,14 @@ def _survey_vs_attribution(data, attr, filters):
         for source, count in survey_counts.items():
             pct = count / survey_total * 100
             s_rows += (f'<tr><td style="text-align:left">{source}</td>'
-                       f'<td style="text-align:right">{pct:.0f}%</td></tr>')
+                       f'<td style="text-align:right">{pct:.0f}%</td>'
+                       f'<td style="text-align:right">{count:,}</td></tr>')
         st.markdown(
             f'<table style="width:100%;border-collapse:collapse;font-size:14px">'
             f'<thead style="border-bottom:2px solid #ccc"><tr>'
             f'<th style="text-align:left">Source</th>'
-            f'<th style="text-align:right">%</th></tr></thead>'
+            f'<th style="text-align:right">%</th>'
+            f'<th style="text-align:right">Leads Attributed</th></tr></thead>'
             f'<tbody>{s_rows}</tbody></table>',
             unsafe_allow_html=True,
         )
@@ -140,12 +142,14 @@ def _survey_vs_attribution(data, attr, filters):
         for ch, weight in digital_counts.items():
             pct = weight / digital_total * 100 if digital_total > 0 else 0
             d_rows += (f'<tr><td style="text-align:left">{ch}</td>'
-                       f'<td style="text-align:right">{pct:.0f}%</td></tr>')
+                       f'<td style="text-align:right">{pct:.0f}%</td>'
+                       f'<td style="text-align:right">{weight:.1f}</td></tr>')
         st.markdown(
             f'<table style="width:100%;border-collapse:collapse;font-size:14px">'
             f'<thead style="border-bottom:2px solid #ccc"><tr>'
             f'<th style="text-align:left">Channel</th>'
-            f'<th style="text-align:right">%</th></tr></thead>'
+            f'<th style="text-align:right">%</th>'
+            f'<th style="text-align:right">Leads Attributed</th></tr></thead>'
             f'<tbody>{d_rows}</tbody></table>',
             unsafe_allow_html=True,
         )
