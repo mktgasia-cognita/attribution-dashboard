@@ -245,12 +245,7 @@ def render(data, filters):
             "Sibling": "#D4C5A9",
             "Unknown": "#C4C4C4",
         }
-        ordered = ["Webform", "Email", "Direct Application", "Phone",
-                    "Walk-in", "Website", "Referral", "Parent Application Portal",
-                    "Sibling"]
-        labels_ordered = [ch for ch in ordered if ch in channel_counts.index]
-        extras = [ch for ch in channel_counts.index if ch not in ordered]
-        labels_ordered.extend(extras)
+        labels_ordered = channel_counts.sort_values(ascending=False).index.tolist()
 
         fig_mix = go.Figure()
         for ch in labels_ordered:
