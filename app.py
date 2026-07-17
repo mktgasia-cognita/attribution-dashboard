@@ -154,14 +154,24 @@ def _data_source():
         return "csv"
 
 
-DATA_VERSION = "16"
+def _bq_run_ts():
+    """Lightweight query for latest pipeline run timestamp. Used as cache key
+    so the dashboard auto-refreshes when a new pipeline run completes."""
+    if _data_source() != "bigquery":
+        return "csv"
+    try:
+        from data.bigquery import _get_client, PROJECT, DATASET
+        client = _get_client()
+        row = next(client.query(
+            f"SELECT MAX(pipeline_run_ts) AS ts FROM `{PROJECT}.{DATASET}.v_pipeline_latest`"
+        ).result())
+        return str(row.ts) if row.ts else "none"
+    except Exception:
+        return "unknown"
 
 
 @st.cache_data(ttl=3600 if _data_source() == "bigquery" else None)
-def get_data(version=DATA_VERSION, source=None):
-    # version + source are part of the cache key: bumping DATA_VERSION or
-    # switching data source invalidates cached data (underscore-prefixed
-    # params are excluded from Streamlit's cache key - do not rename back).
+def get_data(run_ts=None, source=None):
     if source == "bigquery":
         from data.bigquery import load_data_from_bq
         return load_data_from_bq()
@@ -182,7 +192,7 @@ page = st.sidebar.radio("Navigation", list(PAGES.keys()), label_visibility="coll
 st.sidebar.divider()
 
 try:
-    data = get_data(source=_data_source())
+    data = get_data(run_ts=_bq_run_ts(), source=_data_source())
 except Exception as exc:
     st.error(
         "Could not load dashboard data. If this is BigQuery mode, check the "
