@@ -56,6 +56,7 @@ def render(data, filters):
     # --- Data Completeness Section ---
     stitch = data.get("stitch_audit", pd.DataFrame())
     tracked_count = 0
+    webform_base = 0
     if not stitch.empty:
         if "school" in stitch.columns and filters.get("schools"):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
@@ -261,7 +262,7 @@ def render(data, filters):
         )
 
         funnel = [
-            ("Journeys", f"{unique_journeys:,}", "#E3EDF7", "#1a2a3a", None),
+            ("Journeys", f"{webform_base:,}", "#E3EDF7", "#1a2a3a", None),
             ("Leads", f"{tracked_count:,}", "#C3D8ED", "#1a2a3a", f"CRM: {crm_total:,}"),
             ("Enquiries", f"{total_enquiries:,.0f}", "#8CB4DB", "#1e3a50", None),
             ("Applications", f"{total_applications:,.0f}", "#5A91C4", "#ffffff", None),
@@ -282,7 +283,7 @@ def render(data, filters):
         )
     else:
         funnel = [
-            ("Journeys", f"{unique_journeys:,}", "#E3EDF7", "#1a2a3a"),
+            ("Journeys", f"{webform_base:,}", "#E3EDF7", "#1a2a3a"),
             ("Leads", f"{total_leads:,.0f}", "#C3D8ED", "#1a2a3a"),
             ("Enquiries", f"{total_enquiries:,.0f}", "#8CB4DB", "#1e3a50"),
             ("Applications", f"{total_applications:,.0f}", "#5A91C4", "#ffffff"),
