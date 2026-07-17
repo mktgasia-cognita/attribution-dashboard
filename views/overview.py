@@ -263,9 +263,10 @@ def render(data, filters):
                 orientation="h",
                 marker_color=ENTRY_CHANNEL_COLORS.get(ch, "#bdc3c7"),
                 hovertemplate=f"<b>{ch}</b><br>{count:,} leads ({pct:.1f}%)<extra></extra>",
-                text=f"{ch} ({pct:.0f}%)" if pct >= 5 else "",
+                text=f"  {ch} ({pct:.0f}%)" if pct >= 5 else "",
                 textposition="inside",
                 insidetextanchor="start",
+                constraintext="none",
                 textfont=dict(color="white" if ch == "Webform" else "#1a2a3a", size=12),
             ))
 
