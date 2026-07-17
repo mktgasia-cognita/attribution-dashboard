@@ -85,11 +85,13 @@ def load_data_from_bq():
 
     try:
         stitch_audit = _query(client, "v_stitch_audit")
-    except Exception:
+    except Exception as e:
+        print(f"stitch_audit load failed: {e}")
         stitch_audit = pd.DataFrame()
     try:
         crm_leads_raw = _query(client, "v_crm_leads_raw")
-    except Exception:
+    except Exception as e:
+        print(f"crm_leads_raw load failed: {e}")
         crm_leads_raw = pd.DataFrame()
 
     ad_lookups_raw = _query(client, "v_ad_lookups")
