@@ -310,10 +310,13 @@ def render(data, filters):
         st.markdown("")
 
     # --- Lead Source Mix (CRM entry channels) ---
+    # Scope to same lead population as Data Completeness (latest pipeline run)
     crm_raw = data.get("crm_leads_raw", pd.DataFrame())
-    if not crm_raw.empty:
+    if not crm_raw.empty and not stitch.empty:
         if "d365_id" in crm_raw.columns:
             crm_raw = crm_raw.drop_duplicates(subset=["d365_id"], keep="last")
+            stitch_ids = set(stitch["d365_id"].dropna())
+            crm_raw = crm_raw[crm_raw["d365_id"].isin(stitch_ids)]
         crm_filtered = crm_raw.copy()
         if "school" in crm_filtered.columns and filters.get("schools"):
             crm_filtered = crm_filtered[crm_filtered["school"].isin(filters["schools"])]
