@@ -71,6 +71,73 @@ def _channel_stage_table(attr):
     )
 
 
+def _survey_vs_attribution(data, attr, filters):
+    from utils.filters import apply_filters
+    crm_raw = data.get("crm_leads_raw", pd.DataFrame())
+    if crm_raw.empty or "heard_about" not in crm_raw.columns:
+        return
+
+    crm_filtered = apply_filters(crm_raw, filters, apply_channel=False)
+    if crm_filtered.empty:
+        return
+
+    stitch = data.get("stitch_audit", pd.DataFrame())
+    if stitch.empty or "d365_id" not in stitch.columns:
+        return
+
+    stitched_ids = set(stitch[stitch["bq_sessions_found"] > 0]["d365_id"].dropna())
+    matched = crm_filtered[crm_filtered["d365_id"].isin(stitched_ids)].copy()
+    if matched.empty or matched["heard_about"].dropna().empty:
+        return
+
+    st.divider()
+    st.subheader("Survey vs Digital Attribution")
+    section_guide(
+        "Comparing what parents told us (<strong>survey</strong>) with where our tracking saw them "
+        "(<strong>digital attribution</strong>) — for the same set of stitched leads only. "
+        "Neither source is perfectly accurate: surveys reflect recall and awareness, "
+        "digital attribution reflects trackable online behaviour. "
+        "Gaps between the two highlight where offline word-of-mouth or brand awareness "
+        "drives the initial interest that digital channels then convert."
+    )
+
+    survey_counts = matched["heard_about"].fillna("Not Answered").value_counts()
+    matched_attr = attr[
+        (attr["stage"] == "D1 Lead")
+        & (attr["d365_id"].isin(stitched_ids))
+        & (~attr["channel_grouping"].isin(["Offline", "Unknown"]))
+    ]
+    digital_counts = matched_attr.groupby("channel_grouping")["attribution_weight"].sum().sort_values(ascending=False)
+
+    col_survey, col_digital = st.columns(2)
+    with col_survey:
+        st.markdown('<div class="kpi-sect">How Parents Say They Found Us</div>', unsafe_allow_html=True)
+        fig_s = go.Figure(go.Bar(
+            x=survey_counts.values, y=survey_counts.index, orientation="h",
+            marker_color="#3472A8",
+        ))
+        fig_s.update_layout(height=max(200, len(survey_counts) * 30), margin=dict(l=0, r=10, t=0, b=0),
+                            xaxis=dict(title="Leads"), yaxis=dict(autorange="reversed"),
+                            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig_s, use_container_width=True, config={"displayModeBar": False})
+
+    with col_digital:
+        st.markdown('<div class="kpi-sect">Digital Attribution (Markov)</div>', unsafe_allow_html=True)
+        fig_d = go.Figure(go.Bar(
+            x=digital_counts.values, y=digital_counts.index, orientation="h",
+            marker_color="#5A91C4",
+        ))
+        fig_d.update_layout(height=max(200, len(digital_counts) * 30), margin=dict(l=0, r=10, t=0, b=0),
+                            xaxis=dict(title="Attributed Leads"), yaxis=dict(autorange="reversed"),
+                            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig_d, use_container_width=True, config={"displayModeBar": False})
+
+    st.caption(
+        f"Based on {len(matched):,} leads with both a survey response and a stitched digital journey. "
+        f"This is {len(matched) / len(crm_filtered) * 100:.0f}% of leads in the selected date range."
+    )
+
+
 def render(data, filters):
     from utils.filters import apply_filters
 
@@ -371,6 +438,9 @@ def render(data, filters):
         "<strong>(Other)</strong> = traffic from sources that don't fit a standard channel grouping."
     )
     _channel_stage_table(attr)
+
+    # --- Survey vs Digital Attribution ---
+    _survey_vs_attribution(data, attr, filters)
 
     st.divider()
 
