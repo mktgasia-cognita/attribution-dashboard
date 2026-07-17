@@ -22,7 +22,7 @@ def _channel_stage_table(attr):
         ("D2 Enquiry", "Enquiries"),
         ("D5 Enrolment", "Enrolments"),
     ]
-    table_attr = attr[~attr["channel_grouping"].isin(["Offline"])]
+    table_attr = attr[~attr["channel_grouping"].isin(["Offline", "Unknown"])]
     channels = sorted(
         table_attr["channel_grouping"].dropna().unique()
     )
@@ -443,7 +443,7 @@ def render(data, filters):
             "each channel's actual contribution to conversions, rather than giving "
             "all credit to the last click."
         )
-        lead_attr = attr[(attr["stage"] == "D1 Lead") & (~attr["channel_grouping"].isin(["Offline", "(Other)"]))]
+        lead_attr = attr[(attr["stage"] == "D1 Lead") & (~attr["channel_grouping"].isin(["Offline", "(Other)", "Unknown"]))]
         channel_attr = lead_attr.groupby("channel_grouping")["attribution_weight"].sum().reset_index()
         channel_attr = channel_attr.sort_values("attribution_weight", ascending=False)
         visible_leads = channel_attr["attribution_weight"].sum()
@@ -515,7 +515,7 @@ def render(data, filters):
         "Decimal values (e.g. 2.50) mean credit is shared — this campaign contributed "
         "to 2-3 enquiries but shares credit with other channels those prospects also interacted with."
     )
-    d2_attr = attr[(attr["stage"] == "D2 Enquiry") & (~attr["channel_grouping"].isin(["Offline", "(Other)"]))]
+    d2_attr = attr[(attr["stage"] == "D2 Enquiry") & (~attr["channel_grouping"].isin(["Offline", "(Other)", "Unknown"]))]
     top_sources = d2_attr.groupby(["channel_grouping", "campaign"]).agg(
         attributed_conversions=("attribution_weight", "sum"),
     ).reset_index()
