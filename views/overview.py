@@ -205,7 +205,8 @@ def render(data, filters):
     tracked_count = 0
     webform_base = 0
     # DEBUG — remove after verifying fix on Streamlit Cloud
-    st.caption(f"DEBUG stitch loaded: {len(stitch)} rows, cols: {list(stitch.columns)[:5]}")
+    stitch_err = data.get("_stitch_err")
+    st.caption(f"DEBUG stitch loaded: {len(stitch)} rows, cols: {list(stitch.columns)[:5]}, err: {stitch_err}")
     if not stitch.empty:
         if "school" in stitch.columns and filters.get("schools"):
             stitch = stitch[stitch["school"].isin(filters["schools"])]
