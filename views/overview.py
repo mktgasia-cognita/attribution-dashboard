@@ -357,8 +357,10 @@ def render(data, filters):
         meta_spend = spend_df[spend_df["platform"] == "meta"]["spend"].sum() if "platform" in spend_df.columns else 0
         cpl = total_spend / total_leads if total_leads > 0 else 0
         cpen = total_spend / total_enquiries if total_enquiries > 0 else 0
-        cpenrol_google = google_spend / total_enrolments if total_enrolments > 0 and google_spend > 0 else 0
-        cpenrol_meta = meta_spend / total_enrolments if total_enrolments > 0 and meta_spend > 0 else 0
+        enrol_ps = attr[(attr["stage"] == "D5 Enrolment") & (attr["channel_grouping"] == "Paid Search")]["attribution_weight"].sum()
+        enrol_psoc = attr[(attr["stage"] == "D5 Enrolment") & (attr["channel_grouping"] == "Paid Social")]["attribution_weight"].sum()
+        cpenrol_google = google_spend / enrol_ps if enrol_ps > 0 and google_spend > 0 else 0
+        cpenrol_meta = meta_spend / enrol_psoc if enrol_psoc > 0 and meta_spend > 0 else 0
         mer = (total_leads / total_spend * 1000) if total_spend > 0 else 0
         c = filters["currency"]
 
@@ -376,9 +378,9 @@ def render(data, filters):
             ("CPEn", fmt(cpen, c) if total_enquiries > 0 else "N/A",
              "Cost Per Enquiry — total ad spend divided by enquiries (further down the funnel than leads)"),
             ("CPEnrol Google", fmt(cpenrol_google, c) if cpenrol_google > 0 else "N/A",
-             "Cost Per Enrolment from Google Ads — Google Ads spend divided by total enrolments"),
+             "Cost Per Enrolment — Google Ads spend divided by enrolments attributed to Paid Search"),
             ("CPEnrol Meta", fmt(cpenrol_meta, c) if cpenrol_meta > 0 else "N/A",
-             "Cost Per Enrolment from Meta Ads — Meta Ads spend divided by total enrolments"),
+             "Cost Per Enrolment — Meta Ads spend divided by enrolments attributed to Paid Social"),
             (f"Leads/{c} 1k", f"{mer:.1f}" if total_spend > 0 else "N/A",
              f"How many leads generated per {c} 1,000 spent"),
         ]
