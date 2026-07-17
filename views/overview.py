@@ -35,9 +35,8 @@ def _channel_stage_table(attr):
         leads = ch_data[ch_data["stage"] == "D1 Lead"]["attribution_weight"].sum()
         enqs = ch_data[ch_data["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
         enrols = ch_data[ch_data["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
-        cr = f"{enqs / leads * 100:.0f}%" if leads > 0 else "—"
         rows.append({"Channel": ch, "Leads": int(round(leads)), "Enquiries": int(round(enqs)),
-                      "Enrolments": int(round(enrols)), "CR Lead → Enq": cr})
+                      "Enrolments": int(round(enrols))})
 
     df = pd.DataFrame(rows).sort_values("Leads", ascending=False)
     st.dataframe(df, use_container_width=True, hide_index=True)
