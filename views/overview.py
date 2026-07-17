@@ -22,9 +22,8 @@ def _channel_stage_table(attr):
         ("D2 Enquiry", "Enquiries"),
         ("D5 Enrolment", "Enrolments"),
     ]
-    exclude = {"Offline", "(Other)", "Unknown"}
     channels = sorted(
-        attr[~attr["channel_grouping"].isin(exclude)]["channel_grouping"].dropna().unique()
+        attr["channel_grouping"].dropna().unique()
     )
     if not channels:
         return
