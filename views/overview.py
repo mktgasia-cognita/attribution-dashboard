@@ -206,7 +206,9 @@ def render(data, filters):
         )
         st.caption(
             "Avg. Days to Lead = days between first tracked website visit and form submission "
-            "(BQ-matched leads only). Cookie resets, browser switches, and private browsing mean "
+            "(first-touch to last-touch matched leads only). This metric is influenced by the "
+            "Trackable Journeys % — a lower match rate means fewer leads contribute to the average, "
+            "which may skew the result. Cookie resets, browser switches, and private browsing mean "
             "the true consideration period is likely longer."
         )
         st.markdown("")
