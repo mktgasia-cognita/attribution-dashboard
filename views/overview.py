@@ -35,12 +35,17 @@ def _channel_stage_table(attr):
         leads = ch_data[ch_data["stage"] == "D1 Lead"]["attribution_weight"].sum()
         enqs = ch_data[ch_data["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
         enrols = ch_data[ch_data["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
+        eq_rate = f"{enqs / leads * 100:.0f}%" if leads > 0 else "—"
         rows.append({"Channel": ch, "Leads": round(leads, 1), "Enquiries": round(enqs, 1),
-                      "Enrolments": round(enrols, 1)})
+                      "Enquiry Rate": eq_rate, "Enrolments": round(enrols, 1)})
 
     df = pd.DataFrame(rows).sort_values("Leads", ascending=False)
-    totals = {"Channel": "Total", "Leads": df["Leads"].sum(), "Enquiries": df["Enquiries"].sum(),
-              "Enrolments": df["Enrolments"].sum()}
+    total_leads = df["Leads"].sum()
+    total_enqs = df["Enquiries"].sum()
+    total_enrols = df["Enrolments"].sum()
+    total_rate = f"{total_enqs / total_leads * 100:.0f}%" if total_leads > 0 else "—"
+    totals = {"Channel": "Total", "Leads": total_leads, "Enquiries": total_enqs,
+              "Enquiry Rate": total_rate, "Enrolments": total_enrols}
     df = pd.concat([df, pd.DataFrame([totals])], ignore_index=True)
     st.dataframe(df, use_container_width=True, hide_index=True)
 
@@ -334,6 +339,14 @@ def render(data, filters):
             unsafe_allow_html=True,
         )
     # Channel attribution table
+    section_guide(
+        "Markov-attributed volume by channel for the selected date range. "
+        "<strong>Enquiry Rate</strong> is a lead quality signal — the ratio of attributed enquiries "
+        "to attributed leads per channel. It indicates how well each channel's leads progress, "
+        "but is not a true conversion rate since attribution is assigned independently at each stage. "
+        "<strong>Enrolments</strong> may appear low or zero — the lead-to-enrolment cycle is typically "
+        "3+ months, so enrolment attribution requires data well beyond the selected date range."
+    )
     _channel_stage_table(attr)
 
     st.divider()
