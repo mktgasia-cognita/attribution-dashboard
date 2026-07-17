@@ -569,8 +569,8 @@ def render(data, filters):
         )
         fig_donut.update_layout(
             showlegend=False,
-            margin=dict(t=40, b=80, l=80, r=80),
-            height=480,
+            margin=dict(t=40, b=120, l=80, r=80),
+            height=520,
         )
         st.plotly_chart(fig_donut, width="stretch")
 
