@@ -29,6 +29,7 @@ def _channel_stage_table(attr):
     if not channels:
         return
 
+    total_leads_sum = table_attr[table_attr["stage"] == "D1 Lead"]["attribution_weight"].sum()
     total_enqs = table_attr[table_attr["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
     rows = []
     for ch in channels:
@@ -36,9 +37,11 @@ def _channel_stage_table(attr):
         leads = ch_data[ch_data["stage"] == "D1 Lead"]["attribution_weight"].sum()
         enqs = ch_data[ch_data["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
         enrols = ch_data[ch_data["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
+        ld_share = f"{leads / total_leads_sum * 100:.0f}%" if total_leads_sum > 0 else "—"
         eq_share = f"{enqs / total_enqs * 100:.0f}%" if total_enqs > 0 else "—"
-        rows.append({"Channel": ch, "Leads": round(leads, 2), "Enquiries": round(enqs, 2),
-                      "Enquiry Share": eq_share, "Enrolments": round(enrols, 2)})
+        rows.append({"Channel": ch, "Leads": round(leads, 2), "Lead Share": ld_share,
+                      "Enquiries": round(enqs, 2), "Enquiry Share": eq_share,
+                      "Enrolments": round(enrols, 2)})
 
     rows.sort(key=lambda r: r["Leads"], reverse=True)
     total_leads = round(sum(r["Leads"] for r in rows), 2)
@@ -46,6 +49,7 @@ def _channel_stage_table(attr):
     total_enrols = round(sum(r["Enrolments"] for r in rows), 2)
     hdr = ('<tr><th style="text-align:left">Channel</th>'
            '<th style="text-align:right">Leads</th>'
+           '<th style="text-align:center">Lead Share</th>'
            '<th style="text-align:right">Enquiries</th>'
            '<th style="text-align:center">Enquiry Share</th>'
            '<th style="text-align:right">Enrolments</th></tr>')
@@ -53,12 +57,14 @@ def _channel_stage_table(attr):
     for r in rows:
         body += (f'<tr><td style="text-align:left">{r["Channel"]}</td>'
                  f'<td style="text-align:right">{r["Leads"]}</td>'
+                 f'<td style="text-align:center">{r["Lead Share"]}</td>'
                  f'<td style="text-align:right">{r["Enquiries"]}</td>'
                  f'<td style="text-align:center">{r["Enquiry Share"]}</td>'
                  f'<td style="text-align:right">{r["Enrolments"]}</td></tr>')
     foot = (f'<tr style="font-weight:600;border-top:2px solid #ccc">'
             f'<td style="text-align:left">Total</td>'
             f'<td style="text-align:right">{total_leads}</td>'
+            f'<td style="text-align:center">100%</td>'
             f'<td style="text-align:right">{total_enqs}</td>'
             f'<td style="text-align:center">100%</td>'
             f'<td style="text-align:right">{total_enrols}</td></tr>')
@@ -449,9 +455,9 @@ def render(data, filters):
     # Channel attribution table
     section_guide(
         "Markov-attributed volume by channel for the selected date range. "
-        "<strong>Enquiry Share</strong> shows what percentage of total attributed enquiries each "
-        "channel accounts for. Compare it against the Leads column to spot efficiency: a channel "
-        "with a small share of leads but a large share of enquiries is converting well. "
+        "<strong>Lead Share</strong> and <strong>Enquiry Share</strong> show each channel's "
+        "percentage of total attributed leads and enquiries. Compare the two to spot efficiency: "
+        "a channel with a small Lead Share but a large Enquiry Share is converting well. "
         "<strong>Enrolments</strong> may appear low or zero — the lead-to-enrolment cycle is typically "
         "3+ months, so enrolment attribution requires data well beyond the selected date range. "
         "<strong>Unknown</strong> = webform leads where no digital signal could be matched "
