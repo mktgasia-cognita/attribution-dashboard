@@ -29,39 +29,38 @@ def _channel_stage_table(attr):
     if not channels:
         return
 
+    total_enqs = table_attr[table_attr["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
     rows = []
     for ch in channels:
         ch_data = table_attr[table_attr["channel_grouping"] == ch]
         leads = ch_data[ch_data["stage"] == "D1 Lead"]["attribution_weight"].sum()
         enqs = ch_data[ch_data["stage"] == "D2 Enquiry"]["attribution_weight"].sum()
         enrols = ch_data[ch_data["stage"] == "D5 Enrolment"]["attribution_weight"].sum()
-        eq_rate = f"{enqs / leads * 100:.0f}%" if leads > 0 else "—"
+        eq_share = f"{enqs / total_enqs * 100:.0f}%" if total_enqs > 0 else "—"
         rows.append({"Channel": ch, "Leads": round(leads, 2), "Enquiries": round(enqs, 2),
-                      "Enquiry Rate": eq_rate, "Enrolments": round(enrols, 2)})
+                      "Enquiry Share": eq_share, "Enrolments": round(enrols, 2)})
 
     rows.sort(key=lambda r: r["Leads"], reverse=True)
     total_leads = round(sum(r["Leads"] for r in rows), 2)
     total_enqs = round(sum(r["Enquiries"] for r in rows), 2)
     total_enrols = round(sum(r["Enrolments"] for r in rows), 2)
-    total_rate = f"{total_enqs / total_leads * 100:.0f}%" if total_leads > 0 else "—"
-
     hdr = ('<tr><th style="text-align:left">Channel</th>'
            '<th style="text-align:right">Leads</th>'
            '<th style="text-align:right">Enquiries</th>'
-           '<th style="text-align:center">Enquiry Rate</th>'
+           '<th style="text-align:center">Enquiry Share</th>'
            '<th style="text-align:right">Enrolments</th></tr>')
     body = ""
     for r in rows:
         body += (f'<tr><td style="text-align:left">{r["Channel"]}</td>'
                  f'<td style="text-align:right">{r["Leads"]}</td>'
                  f'<td style="text-align:right">{r["Enquiries"]}</td>'
-                 f'<td style="text-align:center">{r["Enquiry Rate"]}</td>'
+                 f'<td style="text-align:center">{r["Enquiry Share"]}</td>'
                  f'<td style="text-align:right">{r["Enrolments"]}</td></tr>')
     foot = (f'<tr style="font-weight:600;border-top:2px solid #ccc">'
             f'<td style="text-align:left">Total</td>'
             f'<td style="text-align:right">{total_leads}</td>'
             f'<td style="text-align:right">{total_enqs}</td>'
-            f'<td style="text-align:center">{total_rate}</td>'
+            f'<td style="text-align:center">100%</td>'
             f'<td style="text-align:right">{total_enrols}</td></tr>')
     st.markdown(
         f'<table style="width:100%;border-collapse:collapse;font-size:14px">'
@@ -450,9 +449,9 @@ def render(data, filters):
     # Channel attribution table
     section_guide(
         "Markov-attributed volume by channel for the selected date range. "
-        "<strong>Enquiry Rate</strong> is a lead quality signal — the ratio of attributed enquiries "
-        "to attributed leads per channel. It indicates how well each channel's leads progress, "
-        "but is not a true conversion rate since attribution is assigned independently at each stage. "
+        "<strong>Enquiry Share</strong> shows what percentage of total attributed enquiries each "
+        "channel accounts for. Compare it against the Leads column to spot efficiency: a channel "
+        "with a small share of leads but a large share of enquiries is converting well. "
         "<strong>Enrolments</strong> may appear low or zero — the lead-to-enrolment cycle is typically "
         "3+ months, so enrolment attribution requires data well beyond the selected date range. "
         "<strong>Unknown</strong> = webform leads where no digital signal could be matched "
